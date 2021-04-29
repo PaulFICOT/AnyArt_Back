@@ -1,0 +1,39 @@
+{
+  "name": "slim-skeleton",
+  "version": "1.0.0",
+  "description": "``` composer create-project 5upermario/slim-skeleton project-name ```",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "clear && printf '\\e[3J' && composer test",
+    "watch:test": "npm-watch test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/5upermario/slim-skeleton.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/5upermario/slim-skeleton/issues"
+  },
+  "homepage": "https://github.com/5upermario/slim-skeleton#readme",
+  "devDependencies": {
+    "npm-watch": "^0.6.0"
+  },
+  "watch": {
+    "test": {
+      "patterns": [
+        "config",
+        "lib",
+        "src",
+        "tests"
+      ],
+      "extensions": "php",
+      "quiet": true
+    }
+  }
+}

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PhpIncludePathManager">
+    <include_path>
+      <path value="$PROJECT_DIR$/AnyArt/vendor/vlucas/phpdotenv" />
+      <path value="$PROJECT_DIR$/AnyArt/vendor/theseer/tokenizer" />
+      <path value="$PROJECT_DIR$/AnyArt/vendor/php-di/php-di" />
+      <path value="$PROJECT_DIR$/AnyArt/vendor/php-di/invoker" />
+      <path value="$PROJECT_DIR$/AnyArt/vendor/php-di/phpdoc-reader" />
+      <path value="$PROJECT_DIR$/AnyArt/vendor/psr/log" />
+      <path value="$PROJECT_DIR$/AnyArt/vendor/psr/http-factory" />
+      <path value="$PROJECT_DIR$/AnyArt/vendor/psr/http-server-handler" />
+      <path value="$PROJECT_DIR$/AnyArt/vendor/psr/http-server-middleware" />
+      <path value="$PROJECT_DIR$/AnyArt/vendor/psr/http-message" />
+      <path value="$PROJECT_DIR$/AnyArt/vendor/psr/container" />
+      <path value="$PROJECT_DIR$/AnyArt/vendor/fig/http-message-util" />
+      <path value="$PROJECT_DIR$/AnyArt/vendor/symfony/polyfill-php80" />
+      <path value="$PROJECT_DIR$/AnyArt/vendor/phar-io/manifest" />
+      <path value="$PROJECT_DIR$/AnyArt/vendor/symfony/polyfill-mbstring" />
+      <path value="$PROJECT_DIR$/AnyArt/vendor/phar-io/version" />
+      <path value="$PROJECT_DIR$/AnyArt/vendor/symfony/polyfill-ctype" />
+      <path value="$PROJECT_DIR$/AnyArt/vendor/composer" />
+      <path value="$PROJECT_DIR$/AnyArt/vendor/sebastian/code-unit-reverse-lookup" />
+      <path value="$PROJECT_DIR$/AnyArt/vendor/sebastian/exporter" />
+      <path value="$PROJECT_DIR$/AnyArt/vendor/sebastian/environment" />
+      <path value="$PROJECT_DIR$/AnyArt/vendor/sebastian/resource-operations" />
+      <path value="$PROJECT_DIR$/AnyArt/vendor/sebastian/code-unit" />
+      <path value="$PROJECT_DIR$/AnyArt/vendor/slim/slim" />
+      <path value="$PROJECT_DIR$/AnyArt/vendor/sebastian/type" />
+      <path value="$PROJECT_DIR$/AnyArt/vendor/sebastian/lines-of-code" />
+      <path value="$PROJECT_DIR$/AnyArt/vendor/sebastian/comparator" />
+      <path value="$PROJECT_DIR$/AnyArt/vendor/slim/psr7" />
+      <path value="$PROJECT_DIR$/AnyArt/vendor/sebastian/version" />
+      <path value="$PROJECT_DIR$/AnyArt/vendor/sebastian/object-reflector" />
+      <path value="$PROJECT_DIR$/AnyArt/vendor/sebastian/object-enumerator" />
+      <path value="$PROJECT_DIR$/AnyArt/vendor/sebastian/diff" />
+      <path value="$PROJECT_DIR$/AnyArt/vendor/sebastian/cli-parser" />
+      <path value="$PROJECT_DIR$/AnyArt/vendor/sebastian/global-state" />
+      <path value="$PROJECT_DIR$/AnyArt/vendor/sebastian/recursion-context" />
+      <path value="$PROJECT_DIR$/AnyArt/vendor/sebastian/complexity" />
+      <path value="$PROJECT_DIR$/AnyArt/vendor/nikic/fast-route" />
+      <path value="$PROJECT_DIR$/AnyArt/vendor/monolog/monolog" />
+      <path value="$PROJECT_DIR$/AnyArt/vendor/ralouphie/getallheaders" />
+      <path value="$PROJECT_DIR$/AnyArt/vendor/nikic/php-parser" />
+      <path value="$PROJECT_DIR$/AnyArt/vendor/phpspec/prophecy" />
+      <path value="$PROJECT_DIR$/AnyArt/vendor/myclabs/deep-copy" />
+      <path value="$PROJECT_DIR$/AnyArt/vendor/phpunit/php-invoker" />
+      <path value="$PROJECT_DIR$/AnyArt/vendor/phpoption/phpoption" />
+      <path value="$PROJECT_DIR$/AnyArt/vendor/phpdocumentor/reflection-common" />
+      <path value="$PROJECT_DIR$/AnyArt/vendor/phpunit/php-text-template" />
+      <path value="$PROJECT_DIR$/AnyArt/vendor/phpdocumentor/type-resolver" />
+      <path value="$PROJECT_DIR$/AnyArt/vendor/opis/closure" />
+      <path value="$PROJECT_DIR$/AnyArt/vendor/phpunit/phpunit" />
+      <path value="$PROJECT_DIR$/AnyArt/vendor/phpunit/php-code-coverage" />
+      <path value="$PROJECT_DIR$/AnyArt/vendor/phpunit/php-file-iterator" />
+      <path value="$PROJECT_DIR$/AnyArt/vendor/phpdocumentor/reflection-docblock" />
+      <path value="$PROJECT_DIR$/AnyArt/vendor/phpunit/php-timer" />
+      <path value="$PROJECT_DIR$/AnyArt/vendor/webmozart/assert" />
+      <path value="$PROJECT_DIR$/AnyArt/vendor/graham-campbell/result-type" />
+      <path value="$PROJECT_DIR$/AnyArt/vendor/doctrine/instantiator" />
+    </include_path>
+  </component>
+  <component name="PhpUnit">
+    <phpunit_settings>
+      <PhpUnitSettings load_method="CUSTOM_LOADER" custom_loader_path="$PROJECT_DIR$/AnyArt/vendor/autoload.php" />
+    </phpunit_settings>
+  </component>
+</project>
