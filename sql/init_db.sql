@@ -25,7 +25,7 @@ ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 CREATE TABLE posts(
    post_id INT NOT NULL AUTO_INCREMENT,
-   title INT NOT NULL,
+   title VARCHAR(255) NOT NULL,
    content VARCHAR(255),
    crea_date DATETIME NOT NULL,
    upd_date DATETIME NOT NULL,
@@ -83,7 +83,7 @@ ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 CREATE TABLE users_follower(
    follower_id INT NOT NULL AUTO_INCREMENT,
-   crea_date DATETIME,
+   crea_date DATETIME NOT NULL,
    follower_user_id INT NOT NULL,
    followed_user_id INT NOT NULL,
    PRIMARY KEY(follower_id),
@@ -126,7 +126,6 @@ CREATE TABLE picture(
    user_id INT NOT NULL,
    post_id INT NOT NULL,
    PRIMARY KEY(picture_id),
-   UNIQUE(user_id),
    UNIQUE(url),
    FOREIGN KEY(user_id) REFERENCES users(user_id),
    FOREIGN KEY(post_id) REFERENCES posts(post_id)
