@@ -8,6 +8,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\App;
 use Slim\Exception\HttpNotFoundException;
 use App\UsersDAO;
+use App\CountriesDAO;
 
 return function (App $app) {
 	$app->addMiddleware(new CorsMiddleware);
@@ -26,6 +27,37 @@ return function (App $app) {
 		$response->getBody()->write(json_encode($usersDAO->getUsers()));
         $response = $response->withStatus(200);
         return $response->withHeader('Content-Type', 'application/json');
+	});
+
+	/**
+	 * Get all countries
+	 */
+	$app->get('/api/countries', function (Request $request, Response $response) {
+		$countriesDAO = new CountriesDAO();
+
+		$response->getBody()->write(json_encode($countriesDAO->getCountries()));
+        $response = $response->withStatus(200);
+        return $response->withHeader('Content-Type', 'application/json');
+	});
+
+	/**
+	 * Get a country with the id of this country
+	 */
+	$app->get('/api/countries/{id}', function (Request $request, Response $response, $args) {
+		$countriesDAO = new CountriesDAO();
+		$country = $countriesDAO->getCountriesById($args['id']);
+
+		if (empty($country)) {
+			$response->getBody()->write("The country with this id (". $args["id"] . ") is not found.");
+			$response = $response->withStatus(500);
+            $response = $response->withHeader('Content-Type', 'text/plain');
+		} else {
+			$response->getBody()->write(json_encode($country));
+			$response = $response->withStatus(200);
+            $response = $response->withHeader('Content-Type', 'application/json');
+		}
+
+		return $response;
 	});
 
 	/**
