@@ -93,6 +93,31 @@ return function (App $app) {
 	});
 
 	/**
+	 * Sign in with a user account
+	 */
+	$app->post('/api/signin', function (Request $request, Response $response, $args) {
+		$usersDAO = new UsersDAO();
+		$params = json_decode(strval($request->getBody()), true);
+		$user = $usersDAO->getUsersByEmail($params['email']);
+
+		if (empty($user)) {
+			$response->getBody()->write("Invalid email or password");
+			$response = $response->withStatus(500);
+			return $response->withHeader('Content-Type', 'text/plain');
+		}
+
+		if (password_verify($params['password'], $user['password'])) {
+			$response->getBody()->write("OK!");
+			$response = $response->withStatus(200);
+			return $response->withHeader('Content-Type', 'text/plain');
+		}
+
+		$response->getBody()->write("Invalid email or password");
+		$response = $response->withStatus(500);
+        return $response->withHeader('Content-Type', 'text/plain');
+	});
+
+	/**
 	 * Catch-all route to serve a 404 Not Found page if none of the routes match
 	 * NOTE: make sure this route is defined last
 	 */
