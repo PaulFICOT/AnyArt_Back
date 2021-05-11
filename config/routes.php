@@ -49,6 +49,18 @@ return function (App $app) {
 	});
 
 	/**
+	 * Create a new user account
+	 */
+	$app->post('/api/users', function (Request $request, Response $response, $args) {
+		$usersDAO = new UsersDAO();
+		$usersDAO->createUser(json_decode(strval($request->getBody()), true));
+
+		$response->getBody()->write("The user was created successfully.");
+		$response = $response->withStatus(200);
+        return $response->withHeader('Content-Type', 'text/plain');
+	});
+
+	/**
 	 * Catch-all route to serve a 404 Not Found page if none of the routes match
 	 * NOTE: make sure this route is defined last
 	 */
