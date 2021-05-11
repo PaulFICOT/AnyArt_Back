@@ -1,3 +1,4 @@
+DROP DATABASE anyart;
 CREATE DATABASE IF NOT EXISTS anyart;
 USE anyart;
 
@@ -8,14 +9,6 @@ CREATE TABLE countries(
 )
 ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
-CREATE TABLE users_chat(
-   chat_id INT NOT NULL AUTO_INCREMENT,
-   crea_date DATETIME NOT NULL,
-   upd_date DATETIME NOT NULL,
-   PRIMARY KEY(chat_id)
-)
-ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
-
 CREATE TABLE payment_method(
    payment_method_id INT NOT NULL AUTO_INCREMENT,
    name VARCHAR(50) NOT NULL,
@@ -23,38 +16,10 @@ CREATE TABLE payment_method(
 )
 ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
-CREATE TABLE posts(
-   post_id INT NOT NULL AUTO_INCREMENT,
-   title VARCHAR(255) NOT NULL,
-   content VARCHAR(255),
-   crea_date DATETIME NOT NULL,
-   upd_date DATETIME NOT NULL,
-   PRIMARY KEY(post_id)
-)
-ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
-
 CREATE TABLE categories(
    category_id INT NOT NULL AUTO_INCREMENT,
    category VARCHAR(100) NOT NULL,
    PRIMARY KEY(category_id)
-)
-ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
-
-CREATE TABLE posts_tag(
-   post_tag_id INT NOT NULL AUTO_INCREMENT,
-   tag VARCHAR(50) NOT NULL,
-   post_id INT NOT NULL,
-   PRIMARY KEY(post_tag_id),
-   FOREIGN KEY(post_id) REFERENCES posts(post_id)
-)
-ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
-
-CREATE TABLE posts_view(
-   viewcount_id INT NOT NULL AUTO_INCREMENT,
-   view_count INT,
-   post_id INT NOT NULL,
-   PRIMARY KEY(viewcount_id),
-   FOREIGN KEY(post_id) REFERENCES posts(post_id)
 )
 ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
@@ -96,11 +61,9 @@ CREATE TABLE users_message(
    message_id INT NOT NULL AUTO_INCREMENT,
    message VARCHAR(255),
    is_deleted BOOLEAN NOT NULL,
-   chat_id INT NOT NULL,
    sender_id INT NOT NULL,
    receiver_id INT NOT NULL,
    PRIMARY KEY(message_id),
-   FOREIGN KEY(chat_id) REFERENCES users_chat(chat_id),
    FOREIGN KEY(sender_id) REFERENCES users(user_id),
    FOREIGN KEY(receiver_id) REFERENCES users(user_id)
 )
@@ -120,15 +83,15 @@ CREATE TABLE users_donation(
 )
 ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
-CREATE TABLE picture(
-   picture_id INT NOT NULL AUTO_INCREMENT,
-   url VARCHAR(255) NOT NULL,
+CREATE TABLE posts(
+   post_id INT NOT NULL AUTO_INCREMENT,
+   title VARCHAR(255) NOT NULL,
+   content VARCHAR(255),
+   crea_date DATETIME NOT NULL,
+   upd_date DATETIME NOT NULL,
    user_id INT NOT NULL,
-   post_id INT NOT NULL,
-   PRIMARY KEY(picture_id),
-   UNIQUE(url),
-   FOREIGN KEY(user_id) REFERENCES users(user_id),
-   FOREIGN KEY(post_id) REFERENCES posts(post_id)
+   PRIMARY KEY(post_id),
+   FOREIGN KEY (user_id) REFERENCES users(user_id)
 )
 ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
@@ -136,9 +99,11 @@ CREATE TABLE posts_comment(
    comment_id INT NOT NULL AUTO_INCREMENT,
    content VARCHAR(255) NOT NULL,
    crea_date DATETIME NOT NULL,
+   reply_to INT NOT NULL,
    user_id INT NOT NULL,
    post_id INT NOT NULL,
    PRIMARY KEY(comment_id),
+   FOREIGN KEY(comment_id) REFERENCES posts_comment(comment_id),
    FOREIGN KEY(user_id) REFERENCES users(user_id),
    FOREIGN KEY(post_id) REFERENCES posts(post_id)
 )
@@ -156,20 +121,42 @@ CREATE TABLE posts_like(
 )
 ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
+CREATE TABLE posts_tag(
+   post_tag_id INT NOT NULL AUTO_INCREMENT,
+   tag VARCHAR(80) NOT NULL,
+   post_id INT NOT NULL,
+   PRIMARY KEY(post_tag_id),
+   FOREIGN KEY(post_id) REFERENCES posts(post_id)
+)
+ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
+
+CREATE TABLE posts_view(
+   viewcount_id INT NOT NULL AUTO_INCREMENT,
+   view_count INT,
+   post_id INT NOT NULL,
+   PRIMARY KEY(viewcount_id),
+   UNIQUE(post_id),
+   FOREIGN KEY(post_id) REFERENCES posts(post_id)
+)
+ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
+
+CREATE TABLE picture(
+   picture_id INT NOT NULL AUTO_INCREMENT,
+   url VARCHAR(255) NOT NULL,
+   user_id INT NOT NULL,
+   post_id INT NOT NULL,
+   PRIMARY KEY(picture_id),
+   UNIQUE(url),
+   FOREIGN KEY(user_id) REFERENCES users(user_id),
+   FOREIGN KEY(post_id) REFERENCES posts(post_id)
+)
+ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
+
 CREATE TABLE posts_category_list(
    post_id INT,
    category_id INT,
    PRIMARY KEY(post_id, category_id),
    FOREIGN KEY(post_id) REFERENCES posts(post_id),
    FOREIGN KEY(category_id) REFERENCES categories(category_id)
-)
-ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
-
-CREATE TABLE users_chat_list(
-   user_id INT,
-   chat_id INT,
-   PRIMARY KEY(user_id, chat_id),
-   FOREIGN KEY(user_id) REFERENCES users(user_id),
-   FOREIGN KEY(chat_id) REFERENCES users_chat(chat_id)
 )
 ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
