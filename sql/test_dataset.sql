@@ -14,9 +14,9 @@ INSERT INTO categories(category) VALUES
 
 INSERT INTO users(lastname, firstname, mail, password, salt, birth_date,username, crea_date, upd_date, is_verified,
                   is_active, is_banned, profile_desc, type, job_function, open_to_work, country_id) VALUES
-('FICOT', 'Paul', 'paul.ficot@anyart.com', '123', 'abcdefgh', '1999-03-10', 'pfi', '2014-01-01 10:10:10+01:00', '2020-03-03 10:10:10+01:00',
+('FICOT', 'Paul', 'paul.ficot@anyart.com', '123', 'abcdefghij', '1999-03-10', 'pfi', '2014-01-01 10:10:10+01:00', '2020-03-03 10:10:10+01:00',
  true, true, false, 'Desc PFI', 'admin', 'Job PFI', false, 1),
-('DUBUC', 'Romain', 'romain.dubuc@anyart.com', 'root', 'ijklmnop', '199-01-14', 'rdu', '2015-01-01 10:10:10+01:00', '2020-01-05 10:10:10+01:00',
+('DUBUC', 'Romain', 'romain.dubuc@anyart.com', 'root', 'klmnopqrst', '199-01-14', 'rdu', '2015-01-01 10:10:10+01:00', '2020-01-05 10:10:10+01:00',
  true, true, false, 'Desc RDU', 'enduser', 'Job RDU', true, 2);
 
 INSERT INTO users_follower(crea_date, follower_user_id, followed_user_id) VALUES
