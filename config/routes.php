@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-use App\Example\Action\ExampleAction;
 use Library\Middleware\CorsMiddleware;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\App;
 use Slim\Exception\HttpNotFoundException;
+use App\UsersDAO;
 
 return function (App $app) {
 	$app->addMiddleware(new CorsMiddleware);
@@ -17,12 +17,36 @@ return function (App $app) {
 		return $response;
 	});
 
-	$app->get('/', function (Request $request, Response $response) {
-		$response->getBody()->write('Hello World!');
-		return $response;
+	/**
+	 * Get all users
+	 */
+	$app->get('/api/users', function (Request $request, Response $response) {
+		$usersDAO = new UsersDAO();
+
+		$response->getBody()->write(json_encode($usersDAO->getUsers()));
+        $response = $response->withStatus(200);
+        return $response->withHeader('Content-Type', 'application/json');
 	});
 
-	$app->get('/example', ExampleAction::class);
+	/**
+	 * Get a user with the id of this user
+	 */
+	$app->get('/api/users/{id}', function (Request $request, Response $response, $args) {
+		$usersDAO = new UsersDAO();
+		$user = $usersDAO->getUsersById($args['id']);
+
+		if (empty($user)) {
+			$response->getBody()->write("The user with this id (". $args["id"] . ") is not found.");
+			$response = $response->withStatus(500);
+            $response = $response->withHeader('Content-Type', 'text/plain');
+		} else {
+			$response->getBody()->write(json_encode($user));
+			$response = $response->withStatus(200);
+            $response = $response->withHeader('Content-Type', 'application/json');
+		}
+
+		return $response;
+	});
 
 	/**
 	 * Catch-all route to serve a 404 Not Found page if none of the routes match
