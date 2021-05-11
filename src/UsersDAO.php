@@ -25,7 +25,7 @@ class UsersDAO extends DbConnection {
 
     public function createUser($data) {
         $pwd = password_hash($data['password'], PASSWORD_DEFAULT);
-        $date = new DateTime("now", new DateTimeZone('Europe/Paris') );
+        $date = new DateTime("now", new DateTimeZone('Europe/Paris'));
 
         $sth = $this->database->prepare("INSERT INTO users (
             `lastname`,
@@ -71,17 +71,15 @@ class UsersDAO extends DbConnection {
             ':birth_date' => $data['birthDate'],
             ':username' => $data['username'],
             ':date_now' => strval($date->format('Y-m-d H:i:s')),
-            ':is_verified' => 1,
+            ':is_verified' => 0,
             ':is_active' => 1,
             ':is_banned' => 0,
             ':profile_desc' => $data['description'],
             ':type' => 'user',
             ':job_function' => null,
             ':open_to_work' => 0,
-            ':country_id' => 1
+            ':country_id' => $data['country']
         ));
-
-        $sth->execute();
 
         return true;
     }
