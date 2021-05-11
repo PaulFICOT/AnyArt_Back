@@ -1,4 +1,3 @@
-DROP DATABASE anyart;
 CREATE DATABASE IF NOT EXISTS anyart;
 USE anyart;
 
@@ -99,11 +98,11 @@ CREATE TABLE posts_comment(
    comment_id INT NOT NULL AUTO_INCREMENT,
    content VARCHAR(255) NOT NULL,
    crea_date DATETIME NOT NULL,
-   reply_to INT NOT NULL,
+   reply_to INT,
    user_id INT NOT NULL,
    post_id INT NOT NULL,
    PRIMARY KEY(comment_id),
-   FOREIGN KEY(comment_id) REFERENCES posts_comment(comment_id),
+   FOREIGN KEY(reply_to) REFERENCES posts_comment(comment_id),
    FOREIGN KEY(user_id) REFERENCES users(user_id),
    FOREIGN KEY(post_id) REFERENCES posts(post_id)
 )
@@ -143,8 +142,9 @@ ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 CREATE TABLE picture(
    picture_id INT NOT NULL AUTO_INCREMENT,
    url VARCHAR(255) NOT NULL,
+   is_thumbnail BOOLEAN NOT NULL,
    user_id INT NOT NULL,
-   post_id INT NOT NULL,
+   post_id INT,
    PRIMARY KEY(picture_id),
    UNIQUE(url),
    FOREIGN KEY(user_id) REFERENCES users(user_id),

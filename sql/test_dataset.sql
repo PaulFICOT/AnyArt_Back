@@ -54,12 +54,12 @@ INSERT INTO posts_view(view_count, post_id) VALUES
 (256, 1),
 (313, 2);
 
-INSERT INTO picture(url, user_id, post_id) VALUES
-('bfkdthtte', 1, 1),
-('qsok64ytj', 2, 2),
-('gkrzhrrhs', 1, NULL),
-('jxgkm65i1', 2, NULL),
-('5kykywug7', 2, 2);
+INSERT INTO picture(url, is_thumbnail, user_id, post_id) VALUES
+('bfkdthtte', TRUE, 1, 1),
+('qsok64ytj', TRUE, 2, 2),
+('gkrzhrrhs', FALSE, 1, NULL),
+('jxgkm65i1', FALSE, 2, NULL),
+('5kykywug7', FALSE, 2, 2);
 
 INSERT INTO posts_category_list(post_id, category_id) VALUES
 (1, 1),
