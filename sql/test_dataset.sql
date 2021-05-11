@@ -36,7 +36,7 @@ INSERT INTO posts(title, content, crea_date, upd_date, user_id) VALUES
 ('post2', 'content2', '2020-01-03 10:10:10+01:00', '2021-01-03 10:10:10+01:00', 2);
 
 INSERT INTO posts_comment(content, crea_date, reply_to, user_id, post_id) VALUES
-('comment1', '2021-01-01 10:10:10+01:00', NULL, 1, 1),
+('comment1', '2021-01-01 10:10:10+01:00', NULL, 1, 2),
 ('comment2', '2021-01-01 10:10:10+01:00', 1, 1, 2),
 ('comment3', '2021-01-01 10:10:10+01:00', NULL, 2, 1);
 
