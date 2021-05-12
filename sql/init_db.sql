@@ -1,10 +1,12 @@
+DROP DATABASE anyart;
 CREATE DATABASE IF NOT EXISTS anyart;
 USE anyart;
 
 CREATE TABLE countries(
    country_id INT NOT NULL AUTO_INCREMENT,
    country VARCHAR(63) NOT NULL,
-   PRIMARY KEY(country_id)
+   PRIMARY KEY(country_id),
+   FULLTEXT coutries_idx(country)
 )
 ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
@@ -18,7 +20,8 @@ ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 CREATE TABLE categories(
    category_id INT NOT NULL AUTO_INCREMENT,
    category VARCHAR(100) NOT NULL,
-   PRIMARY KEY(category_id)
+   PRIMARY KEY(category_id),
+   FULLTEXT categories_idx(category)
 )
 ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
@@ -42,7 +45,8 @@ CREATE TABLE users(
    country_id INT NOT NULL,
    PRIMARY KEY(user_id),
    UNIQUE(mail),
-   FOREIGN KEY(country_id) REFERENCES countries(country_id)
+   FOREIGN KEY(country_id) REFERENCES countries(country_id),
+   FULLTEXT users_idx(username, job_function)
 )
 ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
@@ -91,7 +95,8 @@ CREATE TABLE posts(
    upd_date DATETIME NOT NULL,
    user_id INT NOT NULL,
    PRIMARY KEY(post_id),
-   FOREIGN KEY (user_id) REFERENCES users(user_id)
+   FOREIGN KEY (user_id) REFERENCES users(user_id),
+   FULLTEXT posts_idx(title, content)
 )
 ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
@@ -126,7 +131,8 @@ CREATE TABLE posts_tag(
    tag VARCHAR(80) NOT NULL,
    post_id INT NOT NULL,
    PRIMARY KEY(tag_id),
-   FOREIGN KEY(post_id) REFERENCES posts(post_id)
+   FOREIGN KEY(post_id) REFERENCES posts(post_id),
+   FULLTEXT tags_idx(tag)
 )
 ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
