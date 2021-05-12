@@ -9,28 +9,28 @@ use DateTime;
 use DateTimeZone;
 
 class UsersDAO extends DbConnection {
-    public function getUsers() {
+    public function getUsers(): array {
         $sth = $this->database->prepare("SELECT * FROM users");
 		$sth->execute();
 
         return $sth->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function getUsersById($id) {
+    public function getUsersById($id): array {
         $sth = $this->database->prepare("SELECT * FROM users WHERE user_id = :id");
 		$sth->execute(array(':id' => $id));
 
         return $sth->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function getUsersByEmail($email) {
+    public function getUsersByEmail($email): array {
         $sth = $this->database->prepare("SELECT * FROM users WHERE mail = :email");
 		$sth->execute(array(':email' => $email));
 
         return $sth->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function createUser($data) {
+    public function createUser($data): bool {
         $pwd = password_hash($data['password'], PASSWORD_DEFAULT);
         $date = new DateTime("now", new DateTimeZone('Europe/Paris'));
 

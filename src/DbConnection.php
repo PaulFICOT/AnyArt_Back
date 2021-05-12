@@ -7,7 +7,7 @@ namespace App;
 use PDO;
 
 class DbConnection {
-    public $database;
+    public PDO $database;
 
     public function __construct() {
         $dbhost="localhost";
