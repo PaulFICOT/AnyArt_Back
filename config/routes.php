@@ -97,30 +97,31 @@ return function (App $app) {
 				return $response;
 			});
 
-			/**
-			 * Sign in with a user account
-			 */
-			$group->post('/signin', function (Request $request, Response $response, $args) {
-				$usersDAO = new UsersDAO();
-				$params = json_decode(strval($request->getBody()), true);
-				$user = $usersDAO->getUsersByEmail($params['email']);
+		});
 
-				if (empty($user)) {
-					$response->getBody()->write("Invalid email or password");
-					$response = $response->withStatus(500);
-					return $response->withHeader('Content-Type', 'text/plain');
-				}
+		/**
+		 * Sign in with a user account
+		 */
+		$group->post('/signin', function (Request $request, Response $response, $args) {
+			$usersDAO = new UsersDAO();
+			$params = json_decode(strval($request->getBody()), true);
+			$user = $usersDAO->getUsersByEmail($params['email']);
 
-				if (password_verify($params['password'], $user['password'])) {
-					$response->getBody()->write("OK!");
-					$response = $response->withStatus(200);
-					return $response->withHeader('Content-Type', 'text/plain');
-				}
-
+			if (empty($user)) {
 				$response->getBody()->write("Invalid email or password");
 				$response = $response->withStatus(500);
 				return $response->withHeader('Content-Type', 'text/plain');
-			});
+			}
+
+			if (password_verify($params['password'], $user['password'])) {
+				$response->getBody()->write("OK!");
+				$response = $response->withStatus(200);
+				return $response->withHeader('Content-Type', 'text/plain');
+			}
+
+			$response->getBody()->write("Invalid email or password");
+			$response = $response->withStatus(500);
+			return $response->withHeader('Content-Type', 'text/plain');
 		});
 
 		/**
