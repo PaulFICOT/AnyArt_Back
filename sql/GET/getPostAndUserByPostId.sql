@@ -3,7 +3,7 @@ SELECT
     ,posts.title
     ,posts.user_id
     ,users.username
-    ,posts.content AS 'description'
+    ,posts.content
     ,views.view_count
     ,(SELECT COUNT(like_id) FROM posts_like likes
         WHERE likes.post_id = posts.post_id AND likes.is_like = TRUE) AS 'likes'
@@ -12,7 +12,6 @@ SELECT
 
 FROM posts
 
-INNER JOIN picture pictures ON (posts.post_id = pictures.post_id)
 INNER JOIN users ON (posts.user_id = users.user_id)
 INNER JOIN posts_view views ON (posts.post_id = views.post_id)
 
