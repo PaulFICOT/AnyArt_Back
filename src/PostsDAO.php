@@ -7,8 +7,8 @@ namespace App;
 use PDO;
 
 class PostsDAO extends DbConnection {
-    public function getThumbnails(): array {
-        $sth = $this->database->prepare("
+	public function getThumbnails(): array {
+		$sth = $this->database->prepare("
             SELECT
                  posts.post_id,
                  pictures.url
@@ -21,5 +21,5 @@ class PostsDAO extends DbConnection {
 		$sth->execute();
 
 		return $sth->fetchAll(PDO::FETCH_ASSOC) ?: [];
-    }
+	}
 }
