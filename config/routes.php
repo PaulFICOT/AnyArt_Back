@@ -43,11 +43,6 @@ return function (App $app) {
 				$postsDAO = new PostsDAO();
 				return resolveResponse($response, 200, $postsDAO->getThumbnails());
 			});
-
-				$response->getBody()->write(json_encode($postsDAO->getThumbnails()));
-				$response = $response->withStatus(200);
-				return $response->withHeader('Content-Type', 'application/json');
-			});
 		});
 
 		$group->group('/users', function (RouteCollectorProxy $group) {
