@@ -13,21 +13,21 @@ class UsersDAO extends DbConnection {
         $sth = $this->database->prepare("SELECT * FROM users");
 		$sth->execute();
 
-        return $sth->fetchAll(PDO::FETCH_ASSOC);
+        return $sth->fetchAll(PDO::FETCH_ASSOC) ?: [];
     }
 
     public function getUsersById($id): array {
         $sth = $this->database->prepare("SELECT * FROM users WHERE user_id = :id");
 		$sth->execute(array(':id' => $id));
 
-        return $sth->fetch(PDO::FETCH_ASSOC);
+        return $sth->fetch(PDO::FETCH_ASSOC) ?: [];
     }
 
     public function getUsersByEmail($email): array {
         $sth = $this->database->prepare("SELECT * FROM users WHERE mail = :email");
 		$sth->execute(array(':email' => $email));
 
-        return $sth->fetch(PDO::FETCH_ASSOC);
+        return $sth->fetch(PDO::FETCH_ASSOC) ?: [];
     }
 
     public function createUser($data): bool {

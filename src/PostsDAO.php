@@ -20,6 +20,6 @@ class PostsDAO extends DbConnection {
         ");
 		$sth->execute();
 
-        return $sth->fetchAll(PDO::FETCH_ASSOC);
+		return $sth->fetchAll(PDO::FETCH_ASSOC) ?: [];
     }
 }
