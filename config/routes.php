@@ -9,6 +9,7 @@ use Slim\App;
 use Slim\Exception\HttpNotFoundException;
 use App\UsersDAO;
 use App\CountriesDAO;
+use App\PostsDAO;
 use Slim\Routing\RouteCollectorProxy;
 
 return function (App $app) {
@@ -20,6 +21,19 @@ return function (App $app) {
 	});
 
 	$app->group('/api', function (RouteCollectorProxy $group) {
+		$group->group('/posts', function (RouteCollectorProxy $group) {
+			/**
+			 * Get all post thumbnails
+			 */
+			$group->get('/thumbnails', function (Request $request, Response $response, $args) {
+				$postsDAO = new PostsDAO();
+
+				$response->getBody()->write(json_encode($postsDAO->getThumbnails()));
+				$response = $response->withStatus(200);
+				return $response->withHeader('Content-Type', 'application/json');
+			});
+		});
+
 		$group->group('/users', function (RouteCollectorProxy $group) {
 			/**
 			 * Get all users
