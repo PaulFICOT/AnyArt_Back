@@ -94,7 +94,7 @@ class PostsDAO extends DbConnection {
 
 		$sth->execute(array(':id' => $id));
 
-		return $sth->fetch(PDO::FETCH_ASSOC) ?: [];
+		return $sth->fetchAll(PDO::FETCH_ASSOC) ?: [];
 	}
 
 	public function getPicturesByPostId($id): array {
@@ -112,7 +112,7 @@ class PostsDAO extends DbConnection {
 
 		$sth->execute(array(':id' => $id));
 
-		return $sth->fetch(PDO::FETCH_ASSOC) ?: [];
+		return $sth->fetchAll(PDO::FETCH_ASSOC) ?: [];
 	}
 
 	public function getCommentByPostId($id): array {
@@ -138,6 +138,6 @@ class PostsDAO extends DbConnection {
 
 		$sth->execute(array(':id' => $id));
 
-		return $sth->fetch(PDO::FETCH_ASSOC) ?: [];
+		return $sth->fetchAll(PDO::FETCH_ASSOC) ?: [];
 	}
 }
