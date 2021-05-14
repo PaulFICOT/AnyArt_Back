@@ -44,10 +44,47 @@ return function (App $app) {
 				return resolveResponse($response, 200, $postsDAO->getThumbnails());
 			});
 
-				$response->getBody()->write(json_encode($postsDAO->getThumbnails()));
-				$response = $response->withStatus(200);
-				return $response->withHeader('Content-Type', 'application/json');
+			$group->group('/{id}', function (RouteCollectorProxy $group) {
+				$group->get('', function (Request $request, Response $response, $args) {
+					$postsDAO = new PostsDAO();
+					$post = $postsDAO->getPostAndUserByPostId($args['id']);
+
+					if (empty($post)) {
+						return resolveResponse($response, 500, "The post with this id (" . $args["id"] . ") is not found.", false);
+					}
+
+					return resolveResponse($response, 200, $post);
+				});
+
+				$group->get('/categories', function (Request $request, Response $response, $args) {
+					$postsDAO = new PostsDAO();
+					$categories = $postsDAO->getCategoriesByPostId($args['id']);
+
+					if (empty($categories)) {
+						return resolveResponse($response, 500, "The post with this id (" . $args["id"] . ") is not found.", false);
+					}
+
+					return resolveResponse($response, 200, $categories);
+				});
+				$group->get('/tags', function (Request $request, Response $response, $args) {
+					$postsDAO = new PostsDAO();
+					$tags = $postsDAO->getTagsByPostId($args['id']);
+
+					return resolveResponse($response, 200, $tags);
+				});
+				$group->get('/pictures', function (Request $request, Response $response, $args) {
+					$postsDAO = new PostsDAO();
+					$pictures = $postsDAO->getPicturesByPostId($args['id']);
+
+					if (empty($pictures)) {
+						return resolveResponse($response, 500, "The post with this id (" . $args["id"] . ") is not found.", false);
+					}
+
+					return resolveResponse($response, 200, $pictures);
+				});
 			});
+
+
 		});
 
 		$group->group('/users', function (RouteCollectorProxy $group) {
