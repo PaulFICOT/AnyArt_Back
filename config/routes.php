@@ -82,6 +82,13 @@ return function (App $app) {
 
 					return resolveResponse($response, 200, $pictures);
 				});
+
+				$group->get('/comments', function (Request $request, Response $response, $args) {
+					$postsDAO = new PostsDAO();
+					$comments = $postsDAO->getCommentByPostId($args['id']);
+
+					return resolveResponse($response, 200, $comments);
+				});
 			});
 
 

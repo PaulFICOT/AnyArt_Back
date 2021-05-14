@@ -58,7 +58,7 @@ class PostsDAO extends DbConnection {
 		return $sth->fetchAll(PDO::FETCH_ASSOC) ?: [];
 	}
 
-	public function getCategoriesByPostId($id) {
+	public function getCategoriesByPostId($id): array {
 		$sth = $this->database->prepare("
 			SELECT
 			posts.post_id,
@@ -78,7 +78,7 @@ class PostsDAO extends DbConnection {
 		return $sth->fetch(PDO::FETCH_ASSOC) ?: [];
 	}
 
-	public function getTagsByPostId($id) {
+	public function getTagsByPostId($id): array {
 		$sth = $this->database->prepare("
 			SELECT
 				 posts.post_id,
@@ -97,7 +97,7 @@ class PostsDAO extends DbConnection {
 		return $sth->fetch(PDO::FETCH_ASSOC) ?: [];
 	}
 
-	public function getPicturesByPostId($id) {
+	public function getPicturesByPostId($id): array {
 		$sth = $this->database->prepare("
 			SELECT
 				 posts.post_id,
@@ -115,7 +115,7 @@ class PostsDAO extends DbConnection {
 		return $sth->fetch(PDO::FETCH_ASSOC) ?: [];
 	}
 
-	public function getCommentByPostId($id) {
+	public function getCommentByPostId($id): array {
 		$sth = $this->database->prepare("
 			SELECT
 				 posts.post_id
@@ -135,5 +135,9 @@ class PostsDAO extends DbConnection {
 
 			WHERE posts.post_id = :id
 		");
+
+		$sth->execute(array(':id' => $id));
+
+		return $sth->fetch(PDO::FETCH_ASSOC) ?: [];
 	}
 }
