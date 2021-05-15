@@ -134,6 +134,8 @@ class PostsDAO extends DbConnection {
 			INNER JOIN picture ON (users.user_id = picture.user_id AND picture.post_id IS NULL)
 
 			WHERE posts.post_id = :id
+
+			ORDER BY posts_comment.crea_date
 		");
 
 		$sth->execute(array(':id' => $id));
