@@ -2,7 +2,6 @@ SELECT
      posts.post_id
     ,users.username
     ,posts.title
-    ,posts.content AS 'description'
     ,pictures.picture_id
     ,pictures.url
 FROM posts

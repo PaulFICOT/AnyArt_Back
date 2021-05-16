@@ -23,6 +23,3 @@ INNER JOIN picture ON (users.user_id = picture.user_id AND picture.post_id IS NU
 
 WHERE
     posts.post_id = 2
-
-GROUP BY
-    posts.post_id
