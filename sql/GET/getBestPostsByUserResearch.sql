@@ -5,15 +5,7 @@ SET @limit = 20;
 SET @offset = (@page-1) * @limit;
 
 SET @user = 2;
-SET @keywords = (SELECT
-         CONCAT_WS(' ', GROUP_CONCAT(DISTINCT c.category SEPARATOR ' '),
-         GROUP_CONCAT(DISTINCT pt.tag  SEPARATOR  ' ')) FROM users u
-INNER JOIN posts_like pl on u.user_id = pl.user_id
-INNER JOIN posts_category_list pcl on pl.post_id = pcl.post_id
-INNER JOIN categories c on pcl.category_id = c.category_id
-INNER JOIN posts_tag pt on pl.post_id = pt.post_id
-WHERE u.user_id = @user
-GROUP BY u.username);
+SET @keywords = '';
 
 PREPARE BEST_POSTS FROM '
 SELECT
