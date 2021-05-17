@@ -590,7 +590,25 @@ VALUES ('crayon', 1),
     ('street art', 20);
 INSERT INTO posts_view(view_count, post_id)
 VALUES (256, 1),
-    (313, 2);
+    (313, 2),
+    (9658, 3),
+    (356, 4),
+    (2747, 5),
+    (27, 6),
+    (921, 7),
+    (123, 8),
+    (164, 9),
+    (178, 10),
+    (578, 11),
+    (7234, 12),
+    (987, 13),
+    (989, 14),
+    (865, 15),
+    (643, 16),
+    (978, 17),
+    (745, 18),
+    (624, 19),
+    (663, 20);
 INSERT INTO picture(url, is_thumbnail, user_id, post_id)
 VALUES ('GtwiBmtJvaU', TRUE, 1, 1),
     ('xadzcCQZ_Xc', TRUE, 2, 2),
