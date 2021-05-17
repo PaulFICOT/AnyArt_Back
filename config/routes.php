@@ -11,6 +11,9 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\App;
 use Slim\Exception\HttpNotFoundException;
 use Slim\Routing\RouteCollectorProxy;
+use Lcobucci\JWT\Configuration;
+use Lcobucci\JWT\Signer\Hmac\Sha256;
+use Lcobucci\JWT\Signer\Key\InMemory;
 
 function resolveResponse($response, $statusCode, $content, $json = true) {
 	$response = $response->withStatus($statusCode);
@@ -114,7 +117,21 @@ return function (App $app) {
 			}
 
 			if (password_verify($params['password'], $user['password'])) {
-				return resolveResponse($response, 200, "OK!", false);
+				$config = Configuration::forSymmetricSigner(
+					new Sha256(),
+					InMemory::plainText('supersecret')
+				);
+
+				$now   = new DateTimeImmutable();
+				$token = $config->builder()
+								->identifiedBy('4f1g23a12aa')
+								->issuedAt($now)
+								->canOnlyBeUsedAfter($now->modify('+1 minute'))
+								->expiresAt($now->modify('+24 hour'))
+								->withClaim('user', $user)
+								->getToken($config->signer(), $config->signingKey());
+
+				return resolveResponse($response, 200, $token->toString(), true);
 			}
 
 			return resolveResponse($response, 500, "Invalid email or password", false);
