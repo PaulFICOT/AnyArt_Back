@@ -43,6 +43,7 @@ CREATE TABLE users(
    job_function VARCHAR(100),
    open_to_work BOOLEAN NOT NULL,
    country_id INT NOT NULL,
+   token VARCHAR(255),
    PRIMARY KEY(user_id),
    UNIQUE(mail),
    FOREIGN KEY(country_id) REFERENCES countries(country_id),
