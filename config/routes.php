@@ -44,7 +44,7 @@ return function (App $app) {
 					$post = $postsDAO->getPostAndUserByPostId($args['id']);
 
 					if (empty($post)) {
-						return resolveResponse($response, 500, "The post with this id (" . $args["id"] . ") is not found.", false);
+						return resolveResponse($response, 500, ["message" => "The post with this id (" . $args["id"] . ") is not found."]);
 					}
 
 					return resolveResponse($response, 200, $post);
@@ -55,7 +55,7 @@ return function (App $app) {
 					$categories = $postsDAO->getCategoriesByPostId($args['id']);
 
 					if (empty($categories)) {
-						return resolveResponse($response, 500, "The post with this id (" . $args["id"] . ") is not found.", false);
+						return resolveResponse($response, 500, ["message" => "The post with this id (" . $args["id"] . ") is not found."]);
 					}
 
 					return resolveResponse($response, 200, $categories);
@@ -71,7 +71,7 @@ return function (App $app) {
 					$pictures = $postsDAO->getPicturesByPostId($args['id']);
 
 					if (empty($pictures)) {
-						return resolveResponse($response, 500, "The post with this id (" . $args["id"] . ") is not found.", false);
+						return resolveResponse($response, 500, ["message" => "The post with this id (" . $args["id"] . ") is not found."]);
 					}
 
 					return resolveResponse($response, 200, $pictures);
@@ -82,6 +82,22 @@ return function (App $app) {
 					$comments = $postsDAO->getCommentByPostId($args['id']);
 
 					return resolveResponse($response, 200, $comments);
+				});
+
+				$group->post('/comments', function (Request $request, Response $response, $args) {
+					$postsDAO = new PostsDAO();
+
+					$body = json_decode($request->getBody()->getContents(), true);
+
+					$postsDAO->newComment([
+						':content' => $body['content'],
+						':crea_date' => $body['crea_date'],
+						':reply_to' => $body['reply_to'],
+						':user_id' => $body['user_id'],
+						':post_id' => $args['id']
+					]);
+
+					return resolveResponse($response, 200, ["message" => 'Comment successfully added']);
 				});
 			});
 

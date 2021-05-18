@@ -142,4 +142,15 @@ class PostsDAO extends DbConnection {
 
 		return $sth->fetchAll(PDO::FETCH_ASSOC) ?: [];
 	}
+
+	public function newComment($values): bool {
+		$sth = $this->database->prepare("
+			INSERT INTO posts_comment (content, crea_date, reply_to, user_id, post_id)
+ 			VALUES (:content, :crea_date, :reply_to, :user_id, :post_id)
+		");
+
+		$sth->execute($values);
+
+		return true;
+	}
 }
