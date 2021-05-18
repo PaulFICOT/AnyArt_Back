@@ -111,6 +111,7 @@ CREATE TABLE posts_comment(
    FOREIGN KEY(reply_to) REFERENCES posts_comment(comment_id),
    FOREIGN KEY(user_id) REFERENCES users(user_id),
    FOREIGN KEY(post_id) REFERENCES posts(post_id)
+   ON DELETE CASCADE
 )
 ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
@@ -123,6 +124,7 @@ CREATE TABLE posts_like(
    PRIMARY KEY(like_id),
    FOREIGN KEY(user_id) REFERENCES users(user_id),
    FOREIGN KEY(post_id) REFERENCES posts(post_id)
+   ON DELETE CASCADE
 )
 ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
@@ -131,7 +133,8 @@ CREATE TABLE posts_tag(
    tag VARCHAR(80) NOT NULL,
    post_id INT NOT NULL,
    PRIMARY KEY(tag_id),
-   FOREIGN KEY(post_id) REFERENCES posts(post_id),
+   FOREIGN KEY(post_id) REFERENCES posts(post_id)
+   ON DELETE CASCADE,
    FULLTEXT tags_idx(tag)
 )
 ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
@@ -143,6 +146,7 @@ CREATE TABLE posts_view(
    PRIMARY KEY(viewcount_id),
    UNIQUE(post_id),
    FOREIGN KEY(post_id) REFERENCES posts(post_id)
+   ON DELETE CASCADE
 )
 ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
@@ -156,6 +160,7 @@ CREATE TABLE picture(
    UNIQUE(url),
    FOREIGN KEY(user_id) REFERENCES users(user_id),
    FOREIGN KEY(post_id) REFERENCES posts(post_id)
+   ON DELETE CASCADE
 )
 ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
@@ -163,7 +168,8 @@ CREATE TABLE posts_category_list(
    post_id INT,
    category_id INT,
    PRIMARY KEY(post_id, category_id),
-   FOREIGN KEY(post_id) REFERENCES posts(post_id),
+   FOREIGN KEY(post_id) REFERENCES posts(post_id)
+   ON DELETE CASCADE,
    FOREIGN KEY(category_id) REFERENCES categories(category_id)
 )
 ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
