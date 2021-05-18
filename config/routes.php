@@ -99,6 +99,52 @@ return function (App $app) {
 
 					return resolveResponse($response, 200, ["message" => 'Comment successfully added']);
 				});
+
+				$group->patch('/like', function (Request $request, Response $response, $args) {
+					$postsDAO = new PostsDAO();
+					$body = json_decode($request->getBody()->getContents());
+
+					$postsDAO->rmLike($args['id'], $body['user_id']);
+
+					$postsDAO->like([
+						'post_id' => $args['id'],
+						'user_id' => $body['user_id']
+					]);
+
+					return resolveResponse($response, 200, ["message" => 'Post successfully liked']);
+				});
+
+				$group->patch('/dislike', function (Request $request, Response $response, $args) {
+					$postsDAO = new PostsDAO();
+					$body = json_decode($request->getBody()->getContents());
+
+					$postsDAO->rmLike($args['id'], $body['user_id']);
+
+					$postsDAO->dislike([
+						'post_id' => $args['id'],
+						'user_id' => $body['user_id']
+					]);
+
+					return resolveResponse($response, 200, ["message" => 'Post successfully disliked']);
+				});
+
+				$group->patch('/view', function (Request $request, Response $response, $args) {
+					$postsDAO = new PostsDAO();
+
+					$postsDAO->view($args['id']);
+				});
+
+				$group->patch('/cancel-like', function (Request $request, Response $response, $args) {
+					$postsDAO = new PostsDAO();
+					$body = json_decode($request->getBody()->getContents());
+
+					$postsDAO->rmLike([
+						'post_id' => $args['id'],
+						'user_id' => $body['user_id']
+					]);
+
+					return resolveResponse($response, 200, ["message" => 'Like successfully removed']);
+				});
 			});
 
 

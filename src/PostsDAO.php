@@ -153,4 +153,44 @@ class PostsDAO extends DbConnection {
 
 		return true;
 	}
+
+	public function like($values) {
+		$sth = $this->database->prepare("
+			INSERT INTO posts_like(is_like, crea_date, user_id, post_id)
+			VALUE (true, :crea_date, :user_id, :post_id)
+		");
+
+		$sth->execute($values);
+	}
+
+	public function dislike($values) {
+		$sth = $this->database->prepare("
+			INSERT INTO posts_like(is_like, crea_date, user_id, post_id)
+			VALUE (false, :crea_date, :user_id, :post_id)
+		");
+
+		$sth->execute($values);
+	}
+
+	public function rmLike($values) {
+		$sth = $this->database->prepare("
+			DELETE FROM posts_like
+			WHERE like_id = (SELECT like_id
+							FROM posts_like
+							WHERE user_id = :user_id
+							  AND post_id = :post_id)
+		");
+
+		$sth->execute($values);
+	}
+
+	public function view($post_id) {
+		$sth = $this->database->prepare("
+			UPDATE posts_view pv
+			SET pv.view_count = pv.view_count +1
+			WHERE pv.post_id = :post_id
+		");
+
+		$sth->execute([':post_id' => $post_id]);
+	}
 }
