@@ -1,2 +1,2 @@
-DELETE FROM picture p
-WHERE p.picture_id = ?
+DELETE FROM picture
+WHERE picture.picture_id = ?
