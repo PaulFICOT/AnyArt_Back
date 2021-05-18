@@ -15,16 +15,10 @@ use Lcobucci\JWT\Configuration;
 use Lcobucci\JWT\Signer\Hmac\Sha256;
 use Lcobucci\JWT\Signer\Key\InMemory;
 
-function resolveResponse($response, $statusCode, $content, $json = true) {
+function resolveResponse($response, $statusCode, $content) {
 	$response = $response->withStatus($statusCode);
-
-	if ($json) {
-		$response = $response->withHeader('Content-Type', 'application/json');
-		$response->getBody()->write(json_encode($content));
-	} else {
-		$response = $response->withHeader('Content-Type', 'text/plain');
-		$response->getBody()->write($content);
-	}
+	$response = $response->withHeader('Content-Type', 'application/json');
+	$response->getBody()->write(json_encode($content));
 
 	return $response;
 }
@@ -80,7 +74,7 @@ return function (App $app) {
 				$user = $usersDAO->getUsersById($args['id']);
 
 				if (empty($user)) {
-					return resolveResponse($response, 500, "The user with this id (" . $args["id"] . ") is not found.", false);
+					return resolveResponse($response, 500, ["message" => "The user with this id (" . $args["id"] . ") is not found."]);
 				}
 				return resolveResponse($response, 200, $user);
 			});
@@ -103,7 +97,7 @@ return function (App $app) {
 				$country = $countriesDAO->getCountriesById($args['id']);
 
 				if (empty($country)) {
-					return resolveResponse($response, 500, "The country with this id (" . $args["id"] . ") is not found.", false);
+					return resolveResponse($response, 500, ["message" => "The country with this id (" . $args["id"] . ") is not found."]);
 				}
 					return resolveResponse($response, 200, $country);
 			});
