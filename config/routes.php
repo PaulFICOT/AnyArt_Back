@@ -60,10 +60,10 @@ return function (App $app) {
 					$usersDAO->createUser(json_decode(strval($request->getBody()), true));
 				} catch (PDOException $e) {
 					if ($e->errorInfo[1] == 1062) {
-						return resolveResponse($response, 400, "This email already exists.", false);
+						return resolveResponse($response, 400, ["message" => "This email already exists."]);
 					}
 				}
-				return resolveResponse($response, 200, "The user was created successfully.", false);
+				return resolveResponse($response, 200, ["message" => "The user was created successfully."]);
 			});
 
 			/**
@@ -113,7 +113,7 @@ return function (App $app) {
 			$user = $usersDAO->getUsersByEmail($params['email']);
 
 			if (empty($user)) {
-				return resolveResponse($response, 400, "Invalid email or password", false);
+				return resolveResponse($response, 400, ["message" => "Invalid email or password"]);
 			}
 
 			if (password_verify($params['password'], $user['password'])) {
@@ -131,10 +131,10 @@ return function (App $app) {
 								->withClaim('user', $user)
 								->getToken($config->signer(), $config->signingKey());
 
-				return resolveResponse($response, 200, $token->toString(), true);
+				return resolveResponse($response, 200, ["token" => $token->toString()]);
 			}
 
-			return resolveResponse($response, 400, "Invalid email or password", false);
+			return resolveResponse($response, 400, ["message" => "Invalid email or password"]);
 		});
 
 		/**
