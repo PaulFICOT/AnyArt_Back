@@ -12,16 +12,10 @@ use Slim\App;
 use Slim\Exception\HttpNotFoundException;
 use Slim\Routing\RouteCollectorProxy;
 
-function resolveResponse($response, $statusCode, $content, $json = true) {
+function resolveResponse($response, $statusCode, $content) {
 	$response = $response->withStatus($statusCode);
-
-	if ($json) {
-		$response = $response->withHeader('Content-Type', 'application/json');
-		$response->getBody()->write(json_encode($content));
-	} else {
-		$response = $response->withHeader('Content-Type', 'text/plain');
-		$response->getBody()->write($content);
-	}
+	$response = $response->withHeader('Content-Type', 'application/json');
+	$response->getBody()->write(json_encode($content));
 
 	return $response;
 }
@@ -60,7 +54,7 @@ return function (App $app) {
 			$group->post('', function (Request $request, Response $response, $args) {
 				$usersDAO = new UsersDAO();
 				$usersDAO->createUser(json_decode(strval($request->getBody()), true));
-				return resolveResponse($response, 200, "The user was created successfully.", false);
+				return resolveResponse($response, 200, ["message" => "The user was created successfully."]);
 			});
 
 			/**
@@ -71,7 +65,7 @@ return function (App $app) {
 				$user = $usersDAO->getUsersById($args['id']);
 
 				if (empty($user)) {
-					return resolveResponse($response, 500, "The user with this id (" . $args["id"] . ") is not found.", false);
+					return resolveResponse($response, 500, ["message" => "The user with this id (" . $args["id"] . ") is not found."]);
 				}
 				return resolveResponse($response, 200, $user);
 			});
@@ -94,7 +88,7 @@ return function (App $app) {
 				$country = $countriesDAO->getCountriesById($args['id']);
 
 				if (empty($country)) {
-					return resolveResponse($response, 500, "The country with this id (" . $args["id"] . ") is not found.", false);
+					return resolveResponse($response, 500, ["message" => "The country with this id (" . $args["id"] . ") is not found."]);
 				}
 					return resolveResponse($response, 200, $country);
 			});
@@ -110,14 +104,14 @@ return function (App $app) {
 			$user = $usersDAO->getUsersByEmail($params['email']);
 
 			if (empty($user)) {
-				return resolveResponse($response, 500, "Invalid email or password", false);
+				return resolveResponse($response, 500, ["message" => "Invalid email or password"]);
 			}
 
 			if (password_verify($params['password'], $user['password'])) {
-				return resolveResponse($response, 200, "OK!", false);
+				return resolveResponse($response, 200, ["message" => "OK!"]);
 			}
 
-			return resolveResponse($response, 500, "Invalid email or password", false);
+			return resolveResponse($response, 500, ["message" => "Invalid email or password"]);
 		});
 
 		/**
