@@ -11,6 +11,9 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\App;
 use Slim\Exception\HttpNotFoundException;
 use Slim\Routing\RouteCollectorProxy;
+use Lcobucci\JWT\Configuration;
+use Lcobucci\JWT\Signer\Hmac\Sha256;
+use Lcobucci\JWT\Signer\Key\InMemory;
 
 function resolveResponse($response, $statusCode, $content) {
 	$response = $response->withStatus($statusCode);
@@ -53,7 +56,13 @@ return function (App $app) {
 			 */
 			$group->post('', function (Request $request, Response $response, $args) {
 				$usersDAO = new UsersDAO();
-				$usersDAO->createUser(json_decode(strval($request->getBody()), true));
+				try {
+					$usersDAO->createUser(json_decode(strval($request->getBody()), true));
+				} catch (PDOException $e) {
+					if ($e->errorInfo[1] == 1062) {
+						return resolveResponse($response, 400, ["message" => "This email already exists."]);
+					}
+				}
 				return resolveResponse($response, 200, ["message" => "The user was created successfully."]);
 			});
 
@@ -104,14 +113,28 @@ return function (App $app) {
 			$user = $usersDAO->getUsersByEmail($params['email']);
 
 			if (empty($user)) {
-				return resolveResponse($response, 500, ["message" => "Invalid email or password"]);
+				return resolveResponse($response, 400, ["message" => "Invalid email or password"]);
 			}
 
 			if (password_verify($params['password'], $user['password'])) {
-				return resolveResponse($response, 200, ["message" => "OK!"]);
+				$config = Configuration::forSymmetricSigner(
+					new Sha256(),
+					InMemory::plainText('supersecret')
+				);
+
+				$now   = new DateTimeImmutable();
+				$token = $config->builder()
+								->identifiedBy('4f1g23a12aa')
+								->issuedAt($now)
+								->canOnlyBeUsedAfter($now->modify('+1 minute'))
+								->expiresAt($now->modify('+24 hour'))
+								->withClaim('user', $user)
+								->getToken($config->signer(), $config->signingKey());
+
+				return resolveResponse($response, 200, ["token" => $token->toString()]);
 			}
 
-			return resolveResponse($response, 500, ["message" => "Invalid email or password"]);
+			return resolveResponse($response, 400, ["message" => "Invalid email or password"]);
 		});
 
 		/**
