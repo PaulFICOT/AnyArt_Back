@@ -78,6 +78,15 @@ return function (App $app) {
 				}
 				return resolveResponse($response, 200, $user);
 			});
+
+			/**
+			 * Get all users
+			 */
+			$group->post('/verif', function (Request $request, Response $response) {
+				$usersDAO = new UsersDAO();
+				$param = json_decode(strval($request->getBody()), true);
+				return resolveResponse($response, 200, ["login" => $usersDAO->verifToken($param['id'], $param['token'])]);
+			});
 		});
 
 		$group->group('/countries', function (RouteCollectorProxy $group) {
@@ -128,10 +137,29 @@ return function (App $app) {
 								->issuedAt($now)
 								->canOnlyBeUsedAfter($now->modify('+1 minute'))
 								->expiresAt($now->modify('+24 hour'))
-								->withClaim('user', $user)
+								->withClaim('uid', $user['user_id'])
 								->getToken($config->signer(), $config->signingKey());
 
-				return resolveResponse($response, 200, ["token" => $token->toString()]);
+				$usersDAO->setToken($user['user_id'], $token->toString());
+
+				$data_user = [
+					'user_id' => $user['user_id'],
+					'lastname' => $user['lastname'],
+					'firstname' => $user['firstname'],
+					'mail' => $user['mail'],
+					'birth_date' => $user['birth_date'],
+					'username' => $user['username'],
+					'is_verified' => $user['is_verified'],
+					'is_active' => $user['is_active'],
+					'is_banned' => $user['is_banned'],
+					'profile_desc' => $user['profile_desc'],
+					'type' => $user['type'],
+					'job_function' => $user['job_function'],
+					'open_to_work' => $user['open_to_work'],
+					'country_id' => $user['country_id'],
+				];
+
+				return resolveResponse($response, 200, ["token" => $token->toString(), "user" => $data_user]);
 			}
 
 			return resolveResponse($response, 400, ["message" => "Invalid email or password"]);
