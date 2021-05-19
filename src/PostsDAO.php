@@ -34,7 +34,7 @@ class PostsDAO extends DbConnection {
 			INNER JOIN picture ON (users.user_id = picture.user_id AND picture.post_id IS NULL)
 
 			WHERE
-				posts.post_id = 2
+				posts.post_id = :id
     	");
 
 		$sth->execute(array(':id' => $id));
@@ -42,21 +42,140 @@ class PostsDAO extends DbConnection {
 		return $sth->fetch(PDO::FETCH_ASSOC) ?: [];
 	}
 
-	public function getThumbnails(): array {
+	public function getThumbnailsUnlogged(): array {
 		$sth = $this->database->prepare("
             SELECT
-                 posts.post_id,
-                 pictures.url
+                 posts.post_id
+                ,pictures.url
             FROM posts
 
             INNER JOIN picture AS pictures ON (posts.post_id = pictures.post_id)
 
             WHERE pictures.is_thumbnail = '1'
+			
+			#ORDER BY RAND()
         ");
 		$sth->execute();
 
 		return $sth->fetchAll(PDO::FETCH_ASSOC) ?: [];
 	}
+
+    public function getThumbnailsDiscover($id): array {
+        $maxView = 1500;
+
+        $sth = $this->database->prepare("
+        SELECT
+             CONCAT_WS(' ', GROUP_CONCAT(DISTINCT c.category SEPARATOR ' ')
+            ,GROUP_CONCAT(DISTINCT pt.tag  SEPARATOR  ' ')) AS 'keywords' FROM users u
+        INNER JOIN posts_like pl on u.user_id = pl.user_id
+        INNER JOIN posts_category_list pcl on pl.post_id = pcl.post_id
+        INNER JOIN categories c on pcl.category_id = c.category_id
+        INNER JOIN posts_tag pt on pl.post_id = pt.post_id
+        WHERE u.user_id = :user
+        GROUP BY u.username");
+        $sth->execute(array(':user' => $id));
+        $keywords = $sth->fetchColumn(0) ?: [];
+
+        $sth = $this->database->prepare("
+        SELECT
+             p.post_id
+            ,p2.url
+            FROM users u
+
+        INNER JOIN posts p ON (u.user_id = p.user_id)
+        INNER JOIN picture p2 ON (p.post_id = p2.post_id AND p2.is_thumbnail = TRUE)
+        INNER JOIN posts_view pv ON (p.post_id = pv.post_id)
+        INNER JOIN posts_category_list l on p.post_id = l.post_id
+        INNER JOIN categories c3 on l.category_id = c3.category_id
+        INNER JOIN posts_tag t on p.post_id = t.post_id
+
+        WHERE u.user_id <> :user AND pv.view_count < :maxView
+        GROUP BY p.post_id, u.username, p.title, p2.picture_id, p2.url
+        ORDER BY (
+            SELECT
+                MAX(MATCH(u2.username, u2.job_function) AGAINST(:keywords) +
+                    MATCH(p3.title, p3.content) AGAINST (:keywords) +
+                    MATCH(c.category) AGAINST(:keywords) +
+                    MATCH(pt.tag) AGAINST(:keywords) +
+                    MATCH(c2.country) AGAINST(:keywords)
+                )
+            FROM users u2
+            INNER JOIN posts p3 on u2.user_id = p3.user_id
+            INNER JOIN posts_category_list pcl on p3.post_id = pcl.post_id
+            INNER JOIN categories c on pcl.category_id = c.category_id
+            INNER JOIN posts_tag pt on p3.post_id = pt.post_id
+            INNER JOIN countries c2 on u2.country_id = c2.country_id
+            WHERE p.post_id = p3.post_id
+        ) DESC
+        ");
+        
+		$sth->execute(array(
+            ':user' => $id,
+            ':maxView' => $maxView,
+            ':keywords' => $keywords));
+
+		return $sth->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+	public function getThumbnailsNewPosts(): array {
+        $sth = $this->database->prepare("
+        SELECT
+             posts.post_id
+            ,pictures.url
+        FROM posts
+             INNER JOIN picture AS pictures ON (posts.post_id = pictures.post_id)
+    
+        WHERE pictures.is_thumbnail = '1'
+        ORDER BY posts.crea_date
+        ");
+
+        $sth->execute();
+
+        return $sth->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    public function getThumbnailsHottests(): array {
+        $maxDate = 30;
+
+        $sth = $this->database->prepare("
+        SELECT
+            posts.post_id,
+            pictures.url
+        FROM posts
+            INNER JOIN picture AS pictures ON (posts.post_id = pictures.post_id)
+    
+        WHERE pictures.is_thumbnail = '1'
+        ORDER BY (SELECT COUNT(posts_like.like_id) FROM posts_like
+            WHERE posts_like.post_id = posts.post_id
+            AND DATEDIFF(CURRENT_DATE(), posts_like.crea_date) < :maxdate) DESC
+        ");
+
+        $sth->execute(array(':maxdate' => $maxDate));
+
+        return $sth->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    public function getThumbnailsRaising(): array {
+        $maxDate = 500;
+
+        $sth = $this->database->prepare("
+        SELECT
+            posts.post_id,
+            pictures.url
+        FROM posts
+        INNER JOIN picture AS pictures ON (posts.post_id = pictures.post_id)
+        INNER JOIN posts_view pv on posts.post_id = pv.post_id
+    
+        WHERE pictures.is_thumbnail = '1'
+    
+        ORDER BY IF(DATEDIFF(CURRENT_DATE(), posts.crea_date) < :maxdate, 1, 0) DESC
+                ,pv.view_count DESC
+        ");
+
+        $sth->execute(array(':maxdate' => $maxDate));
+
+        return $sth->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
 
 	public function getCategoriesByPostId($id): array {
 		$sth = $this->database->prepare("

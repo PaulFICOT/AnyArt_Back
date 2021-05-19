@@ -33,12 +33,28 @@ return function (App $app) {
 
 	$app->group('/api', function (RouteCollectorProxy $group) {
 		$group->group('/posts', function (RouteCollectorProxy $group) {
-			/**
-			 * Get all post thumbnails
-			 */
-			$group->get('/thumbnails', function (Request $request, Response $response, $args) {
+
+			// Get all post thumbnails
+			$group->get('/thumbnails/{params}', function (Request $request, Response $response, $args) {
 				$postsDAO = new PostsDAO();
-				return resolveResponse($response, 200, $postsDAO->getThumbnails());
+
+				switch ($args['params']) {
+					case 'unlogged':
+						return resolveResponse($response, 200, $postsDAO->getThumbnailsUnlogged());
+						break;
+					case 'newpost':
+						return resolveResponse($response, 200, $postsDAO->getThumbnailsNewPosts());
+						break;
+					case 'hottest':
+						return resolveResponse($response, 200, $postsDAO->getThumbnailsHottests());
+						break;
+					case 'raising':
+						return resolveResponse($response, 200, $postsDAO->getThumbnailsRaising());
+						break;
+					default:
+						return resolveResponse($response, 200, $postsDAO->getThumbnailsUnlogged());
+						break;
+				}
 			});
 
 			$group->group('/{id}', function (RouteCollectorProxy $group) {
@@ -63,12 +79,14 @@ return function (App $app) {
 
 					return resolveResponse($response, 200, $categories);
 				});
+
 				$group->get('/tags', function (Request $request, Response $response, $args) {
 					$postsDAO = new PostsDAO();
 					$tags = $postsDAO->getTagsByPostId($args['id']);
 
 					return resolveResponse($response, 200, $tags);
 				});
+
 				$group->get('/pictures', function (Request $request, Response $response, $args) {
 					$postsDAO = new PostsDAO();
 					$pictures = $postsDAO->getPicturesByPostId($args['id']);
@@ -148,8 +166,14 @@ return function (App $app) {
 
 					return resolveResponse($response, 200, ["message" => 'Like successfully removed']);
 				});
-			});
 
+				$group->get('/discover', function (Request $request, Response $response, $args) {
+					$postsDAO = new PostsDAO();
+					$comments = $postsDAO->getThumbnailsDiscover($args['id']);
+
+					return resolveResponse($response, 200, $comments);
+				});
+			});
 
 		});
 
