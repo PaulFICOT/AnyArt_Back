@@ -30,6 +30,26 @@ class UsersDAO extends DbConnection {
         return $sth->fetch(PDO::FETCH_ASSOC) ?: [];
     }
 
+    public function setToken($id, $token): bool {
+        $sth = $this->database->prepare("UPDATE users SET token = :token WHERE user_id = :id");
+		$sth->execute([
+            ':token' => $token,
+            ':id' => $id,
+        ]);
+
+        return true;
+    }
+
+    public function verifToken($id, $token): bool {
+        $sth = $this->database->prepare("SELECT 1 FROM users WHERE user_id = :id AND token = :token LIMIT 1");
+        $sth->execute([
+            ':id' => $id,
+            ':token' => $token,
+        ]);
+
+        return $sth->rowCount() == 1;
+    }
+
     public function createUser($data): bool {
         $pwd = password_hash($data['password'], PASSWORD_DEFAULT);
         $date = new DateTime("now", new DateTimeZone('Europe/Paris'));
