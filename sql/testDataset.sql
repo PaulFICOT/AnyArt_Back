@@ -25,7 +25,8 @@ INSERT INTO users(
         type,
         job_function,
         open_to_work,
-        country_id
+        country_id,
+        token
     )
 VALUES (
         'FICOT',
@@ -36,14 +37,15 @@ VALUES (
         'pfi',
         '2014-01-01 10:10:10+01:00',
         '2020-03-03 10:10:10+01:00',
-        TRUE,
-        TRUE,
-        FALSE,
+        true,
+        true,
+        false,
         'Desc PFI',
         'admin',
         'Job PFI',
-        FALSE,
-        1
+        false,
+        1,
+        ''
     ),
     (
         'DUBUC',
@@ -54,14 +56,15 @@ VALUES (
         'rdu',
         '2015-01-01 10:10:10+01:00',
         '2020-01-05 10:10:10+01:00',
-        TRUE,
-        TRUE,
-        FALSE,
+        true,
+        true,
+        false,
         'Desc RDU',
         'enduser',
         'Job RDU',
-        TRUE,
-        2
+        true,
+        2,
+        ''
     ),
     (
         'Joy',
@@ -72,14 +75,15 @@ VALUES (
         'JoyCamacho',
         '2018-07-17 10:26:32',
         '2021-03-06 14:55:20',
-        TRUE,
-        FALSE,
-        FALSE,
+        true,
+        false,
+        false,
         'placerat velit. Quisque varius. Nam porttitor scelerisque neque.',
         'enduser',
         'Commodo Institute',
-        FALSE,
-        3
+        false,
+        3,
+        ''
     ),
     (
         'Hanna',
@@ -90,14 +94,15 @@ VALUES (
         'HannaMayer',
         '2019-12-18 00:33:02',
         '2020-10-12 21:37:17',
-        TRUE,
-        FALSE,
-        FALSE,
+        true,
+        false,
+        false,
         'Aliquam fringilla cursus purus. Nullam scelerisque neque sed',
         'enduser',
         'Ornare Sagittis Felis Limited',
-        FALSE,
-        3
+        false,
+        3,
+        ''
     ),
     (
         'Leo',
@@ -108,14 +113,15 @@ VALUES (
         'LeoJennings',
         '2019-10-13 05:17:35',
         '2020-06-15 19:32:30',
-        TRUE,
-        TRUE,
-        FALSE,
+        true,
+        true,
+        false,
         'ullamcorper viverra. Maecenas iaculis aliquet diam. Sed diam lorem,',
         'enduser',
         'Eu Accumsan Corp.',
-        TRUE,
-        3
+        true,
+        3,
+        ''
     ),
     (
         'Ella',
@@ -126,14 +132,15 @@ VALUES (
         'EllaBenton',
         '2019-06-07 16:16:01',
         '2020-11-30 03:56:27',
-        TRUE,
-        TRUE,
-        FALSE,
+        true,
+        true,
+        false,
         'lobortis augue scelerisque mollis. Phasellus libero',
         'enduser',
         'Eu Placerat Eget Corporation',
-        TRUE,
-        1
+        true,
+        1,
+        ''
     ),
     (
         'Colin',
@@ -144,14 +151,15 @@ VALUES (
         'ColinWood',
         '2019-08-31 03:15:08',
         '2020-11-13 00:33:33',
-        TRUE,
-        FALSE,
-        FALSE,
+        true,
+        false,
+        false,
         'sagittis placerat. Cras dictum ultricies ligula.',
         'enduser',
         'Ut Odio Foundation',
-        TRUE,
-        1
+        true,
+        1,
+        ''
     ),
     (
         'Desiree',
@@ -162,14 +170,15 @@ VALUES (
         'DesireeKaufman',
         '2019-04-03 04:05:49',
         '2020-07-27 19:21:11',
-        TRUE,
-        FALSE,
-        FALSE,
+        true,
+        false,
+        false,
         'Vivamus euismod urna. Nullam lobortis quam a felis ullamcorper',
         'enduser',
         'Vestibulum Associates',
-        FALSE,
-        1
+        false,
+        1,
+        ''
     ),
     (
         'Dawn',
@@ -180,14 +189,15 @@ VALUES (
         'DawnRivers',
         '2018-10-22 21:03:12',
         '2020-06-11 08:00:02',
-        TRUE,
-        TRUE,
-        FALSE,
+        true,
+        true,
+        false,
         'mi pede, nonummy ut, molestie in, tempus eu,',
         'enduser',
         'Dui Semper Industries',
-        FALSE,
-        3
+        false,
+        3,
+        ''
     ),
     (
         'Scarlet',
@@ -198,14 +208,15 @@ VALUES (
         'ScarletBaker',
         '2020-01-11 21:26:30',
         '2021-01-09 04:19:42',
-        TRUE,
-        TRUE,
-        FALSE,
+        true,
+        true,
+        false,
         'Nulla eu neque pellentesque massa',
         'enduser',
         'Lobortis Class Company',
-        FALSE,
-        1
+        false,
+        1,
+        ''
     ),
     (
         'Dieter',
@@ -216,14 +227,15 @@ VALUES (
         'DieterRiggs',
         '2018-05-30 04:57:32',
         '2021-04-30 08:53:54',
-        FALSE,
-        FALSE,
-        TRUE,
+        false,
+        false,
+        true,
         'dui quis accumsan convallis, ante lectus convallis est, vitae',
         'enduser',
         'A Aliquet Vel Foundation',
-        TRUE,
-        3
+        true,
+        3,
+        ''
     ),
     (
         'Mollie',
@@ -234,14 +246,15 @@ VALUES (
         'MollieLewis',
         '2018-08-26 03:09:23',
         '2020-05-22 01:43:23',
-        TRUE,
-        FALSE,
-        FALSE,
+        true,
+        false,
+        false,
         'at arcu. Vestibulum ante ipsum primis in faucibus orci luctus',
         'enduser',
         'Vulputate Risus LLP',
-        FALSE,
-        2
+        false,
+        2,
+        ''
     ),
     (
         'Preston',
@@ -252,14 +265,15 @@ VALUES (
         'PrestonCrosby',
         '2019-11-17 18:01:09',
         '2021-04-09 20:06:04',
-        TRUE,
-        FALSE,
-        FALSE,
+        true,
+        false,
+        false,
         'rutrum urna, nec luctus felis purus ac tellus. Suspendisse',
         'enduser',
         'Odio Inc.',
-        FALSE,
-        1
+        false,
+        1,
+        ''
     ),
     (
         'Fiona',
@@ -270,14 +284,15 @@ VALUES (
         'FionaBarron',
         '2018-07-16 04:05:20',
         '2020-09-05 11:39:09',
-        TRUE,
-        FALSE,
-        FALSE,
+        true,
+        false,
+        false,
         'Quisque varius. Nam porttitor scelerisque',
         'enduser',
         'Nec Ante Maecenas Corp.',
-        TRUE,
-        1
+        true,
+        1,
+        ''
     ),
     (
         'Matthew',
@@ -288,14 +303,15 @@ VALUES (
         'MatthewFlowers',
         '2018-05-23 13:34:38',
         '2021-02-09 22:52:01',
-        FALSE,
-        FALSE,
-        TRUE,
+        false,
+        false,
+        true,
         'felis purus ac tellus. Suspendisse sed dolor. Fusce',
         'enduser',
         'Enim Suspendisse Corporation',
-        FALSE,
-        3
+        false,
+        3,
+        ''
     ),
     (
         'Nolan',
@@ -306,14 +322,15 @@ VALUES (
         'NolanWoodward',
         '2018-08-09 22:57:16',
         '2020-10-11 02:40:19',
-        TRUE,
-        TRUE,
-        FALSE,
+        true,
+        true,
+        false,
         'ipsum ac mi eleifend egestas.',
         'enduser',
         'Tempus Non Foundation',
-        TRUE,
-        2
+        true,
+        2,
+        ''
     ),
     (
         'Chandler',
@@ -324,14 +341,15 @@ VALUES (
         'ChandlerTalley',
         '2018-12-20 20:05:12',
         '2021-05-13 18:32:13',
-        TRUE,
-        FALSE,
-        FALSE,
+        true,
+        false,
+        false,
         'Suspendisse eleifend. Cras sed leo. Cras',
         'enduser',
         'Ante Iaculis Nec Consulting',
-        FALSE,
-        3
+        false,
+        3,
+        ''
     ),
     (
         'Vestil',
@@ -342,14 +360,15 @@ VALUES (
         'VestilSacha',
         '2020-08-05 05:16:44',
         '2021-10-05 11:38:15',
-        TRUE,
-        FALSE,
-        FALSE,
+        true,
+        false,
+        false,
         'sodales at, velit. Nam consequat dolor vitae dolor. Aliquam',
         'enduser',
         'Namoa Inc',
-        FALSE,
-        3
+        false,
+        3,
+        ''
     ),
     (
         'Chase',
@@ -360,14 +379,15 @@ VALUES (
         'ChaseMartin',
         '2019-08-05 05:26:45',
         '2020-10-05 10:38:28',
-        TRUE,
-        TRUE,
-        FALSE,
+        true,
+        true,
+        false,
         'sodales at, velit. Pellentesque ultricies dignissim lacus. Aliquam',
         'enduser',
         'Magna Foundation',
-        FALSE,
-        3
+        false,
+        3,
+        ''
     ),
     (
         'Jenette',
@@ -378,21 +398,22 @@ VALUES (
         'JenetteDunn',
         '2019-01-28 19:33:59',
         '2020-07-30 06:24:48',
-        TRUE,
-        FALSE,
-        FALSE,
+        true,
+        false,
+        false,
         'ante. Vivamus non lorem vitae odio',
         'enduser',
         'Mauris Eu Turpis Inc.',
-        TRUE,
-        3
+        true,
+        3,
+        ''
     );
 INSERT INTO users_follower(crea_date, follower_user_id, followed_user_id)
 VALUES ('2015-01-01 10:10:10+01:00', 1, 2),
     ('2016-01-01 10:10:10+01:00', 2, 1);
 INSERT INTO users_message(message, is_deleted, sender_id, receiver_id)
-VALUES ('Message1', FALSE, 1, 2),
-    ('Message2', FALSE, 2, 1);
+VALUES ('Message1', false, 1, 2),
+    ('Message2', false, 2, 1);
 INSERT INTO users_donation(
         crea_date,
         message,
@@ -563,7 +584,13 @@ VALUES (
         1,
         2
     ),
-    ('comment2', '2021-01-01 10:10:10+01:00', 1, 1, 2),
+    (
+        'comment2',
+        '2021-01-01 10:10:10+01:00',
+        1,
+        1,
+        2
+    ),
     (
         'comment3',
         '2021-01-01 10:10:10+01:00',
@@ -572,14 +599,14 @@ VALUES (
         1
     );
 INSERT INTO posts_like(is_like, crea_date, user_id, post_id)
-VALUES (TRUE, '2021-01-01 10:10:10+01:00', 1, 1),
-    (TRUE, '2021-02-01 10:10:10+01:00', 2, 1),
-    (TRUE, '2021-03-01 10:10:10+01:00', 2, 3),
-    (TRUE, '2021-04-01 10:10:10+01:00', 2, 4),
-    (TRUE, '2021-05-01 10:10:10+01:00', 2, 5),
-    (TRUE, '2021-05-02 10:10:10+01:00', 2, 6),
-    (TRUE, '2021-05-03 10:10:10+01:00', 2, 20),
-    (FALSE, '2021-05-05 10:10:10+01:00', 1, 2);
+VALUES (true, '2021-01-01 10:10:10+01:00', 1, 1),
+    (true, '2021-02-01 10:10:10+01:00', 2, 1),
+    (true, '2021-03-01 10:10:10+01:00', 2, 3),
+    (true, '2021-04-01 10:10:10+01:00', 2, 4),
+    (true, '2021-05-01 10:10:10+01:00', 2, 5),
+    (true, '2021-05-02 10:10:10+01:00', 2, 6),
+    (true, '2021-05-03 10:10:10+01:00', 2, 20),
+    (false, '2021-05-05 10:10:10+01:00', 1, 2);
 INSERT INTO posts_tag(tag, post_id)
 VALUES ('crayon', 1),
     ('feutre', 1),
