@@ -59,13 +59,16 @@ return function (App $app) {
 
 			$group->group('/{id}', function (RouteCollectorProxy $group) {
 				$group->get('', function (Request $request, Response $response, $args) {
+					$query_params = $request->getQueryParams();
 					$postsDAO = new PostsDAO();
-					$post = $postsDAO->getPostAndUserByPostId($args['id']);
-
+					$post = $postsDAO->getPostAndUserByPostId([
+						':post_id' => $args['id'],
+						':user_id' => $query_params['user_id']
+					]);
 					if (empty($post)) {
 						return resolveResponse($response, 500, ["message" => "The post with this id (" . $args["id"] . ") is not found."]);
 					}
-
+					$postsDAO->view($args['id']);
 					return resolveResponse($response, 200, $post);
 				});
 
@@ -121,32 +124,48 @@ return function (App $app) {
 					return resolveResponse($response, 200, ["message" => 'Comment successfully added']);
 				});
 
-				$group->patch('/like', function (Request $request, Response $response, $args) {
+				$group->get('/opinion', function (Request $request, Response $response, $args) {$postsDAO = new PostsDAO();
 					$postsDAO = new PostsDAO();
-					$body = json_decode($request->getBody()->getContents());
+					$opinions = $postsDAO->getOpinion($args['id']);
 
-					$postsDAO->rmLike($args['id'], $body['user_id']);
-
-					$postsDAO->like([
-						'post_id' => $args['id'],
-						'user_id' => $body['user_id']
+					return resolveResponse($response, 200, [
+						'likes' => $opinions[1] ?? 0,
+						'dislikes' => $opinions[0] ?? 0
 					]);
-
-					return resolveResponse($response, 200, ["message" => 'Post successfully liked']);
 				});
 
-				$group->patch('/dislike', function (Request $request, Response $response, $args) {
+				$group->post('/opinion', function (Request $request, Response $response, $args) {
 					$postsDAO = new PostsDAO();
-					$body = json_decode($request->getBody()->getContents());
+					$body = json_decode($request->getBody()->getContents(), true);
 
-					$postsDAO->rmLike($args['id'], $body['user_id']);
+					switch ($body['action']) {
+						case 'like':
+							$postsDAO->setOpinion([
+								':post_id' => $args['id'],
+								':user_id' => $body['user_id'],
+								':crea_date' => $body['crea_date'],
+								':is_like' => 1
+							]);
+							break;
+						case 'dislike':
+							$postsDAO->setOpinion([
+								':post_id' => $args['id'],
+								':user_id' => $body['user_id'],
+								':crea_date' => $body['crea_date'],
+								':is_like' => 0
+							]);
+							break;
+						case 'remove':
+							$postsDAO->rmOpinion([
+								':post_id' => $args['id'],
+								':user_id' => $body['user_id']
+							]);
+							break;
+						default:
+							return resolveResponse($response, 400, ['message', 'Invalid action']);
+					}
 
-					$postsDAO->dislike([
-						'post_id' => $args['id'],
-						'user_id' => $body['user_id']
-					]);
-
-					return resolveResponse($response, 200, ["message" => 'Post successfully disliked']);
+					return resolveResponse($response, 200, ['message', 'Opinion successfully saved']);
 				});
 
 				$group->patch('/view', function (Request $request, Response $response, $args) {

@@ -8,7 +8,7 @@ use PDO;
 
 class PostsDAO extends DbConnection {
 
-	public function getPostAndUserByPostId($id): array {
+	public function getPostAndUserByPostId($values): array {
 		$sth = $this->database->prepare("
 			SELECT
 				 posts.post_id
@@ -22,6 +22,10 @@ class PostsDAO extends DbConnection {
 				,picture.url
 				,posts.content
 				,views.view_count
+				,(SELECT COUNT(like_id) FROM posts_like isliked
+				WHERE isliked.user_id = :user_id AND isliked.post_id = posts.post_id AND isliked.is_like = TRUE) AS 'isLiked'
+				,(SELECT COUNT(like_id) FROM posts_like isdisliked
+				WHERE isdisliked.user_id = :user_id AND isdisliked.post_id = posts.post_id AND isdisliked.is_like = FALSE) AS 'isDisliked'
 				,(SELECT COUNT(like_id) FROM posts_like likes
 					WHERE likes.post_id = posts.post_id AND likes.is_like = TRUE) AS 'likes'
 				,(SELECT COUNT(like_id) FROM posts_like dislikes
@@ -33,11 +37,10 @@ class PostsDAO extends DbConnection {
 			INNER JOIN posts_view views ON (posts.post_id = views.post_id)
 			INNER JOIN picture ON (users.user_id = picture.user_id AND picture.post_id IS NULL)
 
-			WHERE
-				posts.post_id = :id
+			WHERE posts.post_id = :post_id
     	");
 
-		$sth->execute(array(':id' => $id));
+		$sth->execute($values);
 
 		return $sth->fetch(PDO::FETCH_ASSOC) ?: [];
 	}
@@ -52,7 +55,7 @@ class PostsDAO extends DbConnection {
             INNER JOIN picture AS pictures ON (posts.post_id = pictures.post_id)
 
             WHERE pictures.is_thumbnail = '1'
-			
+
 			#ORDER BY RAND()
         ");
 		$sth->execute();
@@ -108,7 +111,7 @@ class PostsDAO extends DbConnection {
             WHERE p.post_id = p3.post_id
         ) DESC
         ");
-        
+
 		$sth->execute(array(
             ':user' => $id,
             ':maxView' => $maxView,
@@ -124,7 +127,7 @@ class PostsDAO extends DbConnection {
             ,pictures.url
         FROM posts
              INNER JOIN picture AS pictures ON (posts.post_id = pictures.post_id)
-    
+
         WHERE pictures.is_thumbnail = '1'
         ORDER BY posts.crea_date
         ");
@@ -143,7 +146,7 @@ class PostsDAO extends DbConnection {
             pictures.url
         FROM posts
             INNER JOIN picture AS pictures ON (posts.post_id = pictures.post_id)
-    
+
         WHERE pictures.is_thumbnail = '1'
         ORDER BY (SELECT COUNT(posts_like.like_id) FROM posts_like
             WHERE posts_like.post_id = posts.post_id
@@ -165,9 +168,9 @@ class PostsDAO extends DbConnection {
         FROM posts
         INNER JOIN picture AS pictures ON (posts.post_id = pictures.post_id)
         INNER JOIN posts_view pv on posts.post_id = pv.post_id
-    
+
         WHERE pictures.is_thumbnail = '1'
-    
+
         ORDER BY IF(DATEDIFF(CURRENT_DATE(), posts.crea_date) < :maxdate, 1, 0) DESC
                 ,pv.view_count DESC
         ");
@@ -273,31 +276,11 @@ class PostsDAO extends DbConnection {
 		return true;
 	}
 
-	public function like($values) {
-		$sth = $this->database->prepare("
-			INSERT INTO posts_like(is_like, crea_date, user_id, post_id)
-			VALUE (true, :crea_date, :user_id, :post_id)
-		");
-
-		$sth->execute($values);
-	}
-
-	public function dislike($values) {
-		$sth = $this->database->prepare("
-			INSERT INTO posts_like(is_like, crea_date, user_id, post_id)
-			VALUE (false, :crea_date, :user_id, :post_id)
-		");
-
-		$sth->execute($values);
-	}
-
-	public function rmLike($values) {
+	public function rmOpinion($values) {
 		$sth = $this->database->prepare("
 			DELETE FROM posts_like
-			WHERE like_id = (SELECT like_id
-							FROM posts_like
-							WHERE user_id = :user_id
-							  AND post_id = :post_id)
+			WHERE user_id = :user_id
+			  AND post_id = :post_id
 		");
 
 		$sth->execute($values);
@@ -311,5 +294,27 @@ class PostsDAO extends DbConnection {
 		");
 
 		$sth->execute([':post_id' => $post_id]);
+	}
+
+	public function setOpinion($values) {
+		$sth = $this->database->prepare("
+			INSERT INTO posts_like(is_like, crea_date, user_id, post_id)
+			VALUE (:is_like, :crea_date, :user_id, :post_id)
+		");
+
+		$sth->execute($values);
+	}
+
+	public function getOpinion($post_id) {
+		$sth = $this->database->prepare("
+			SELECT is_like, COUNT(*)
+			FROM posts_like
+			WHERE post_id = :post_id
+			GROUP BY is_like;
+		");
+
+		$sth->execute([':post_id' => $post_id]);
+
+		return $sth->fetchAll(PDO::FETCH_KEY_PAIR) ?: [];
 	}
 }
