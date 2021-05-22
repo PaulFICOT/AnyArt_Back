@@ -10,7 +10,7 @@ class PostsDAO extends DbConnection {
 
 	public function getPostAndUserByPostId($values): array {
 		$sth = $this->database->prepare("
-			SELECT
+SELECT
 				 posts.post_id
 				,posts.title
 				,posts.user_id
@@ -22,6 +22,7 @@ class PostsDAO extends DbConnection {
 				,picture.url
 				,posts.content
 				,views.view_count
+                ,:user_id
 				,(SELECT COUNT(like_id) FROM posts_like isliked
 				WHERE isliked.user_id = :user_id AND isliked.post_id = posts.post_id AND isliked.is_like = TRUE) AS 'isLiked'
 				,(SELECT COUNT(like_id) FROM posts_like isdisliked
