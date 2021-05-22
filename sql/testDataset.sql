@@ -26,7 +26,8 @@ INSERT INTO users(
         job_function,
         open_to_work,
         country_id,
-        token
+        token,
+        donation_link
     )
 VALUES (
         'FICOT',
@@ -45,6 +46,7 @@ VALUES (
         'Job PFI',
         false,
         1,
+        '',
         ''
     ),
     (
@@ -64,6 +66,7 @@ VALUES (
         'Job RDU',
         true,
         2,
+        '',
         ''
     ),
     (
@@ -83,6 +86,7 @@ VALUES (
         'Commodo Institute',
         false,
         3,
+        '',
         ''
     ),
     (
@@ -102,6 +106,7 @@ VALUES (
         'Ornare Sagittis Felis Limited',
         false,
         3,
+        '',
         ''
     ),
     (
@@ -121,6 +126,7 @@ VALUES (
         'Eu Accumsan Corp.',
         true,
         3,
+        '',
         ''
     ),
     (
@@ -140,6 +146,7 @@ VALUES (
         'Eu Placerat Eget Corporation',
         true,
         1,
+        '',
         ''
     ),
     (
@@ -159,6 +166,7 @@ VALUES (
         'Ut Odio Foundation',
         true,
         1,
+        '',
         ''
     ),
     (
@@ -178,6 +186,7 @@ VALUES (
         'Vestibulum Associates',
         false,
         1,
+        '',
         ''
     ),
     (
@@ -197,6 +206,7 @@ VALUES (
         'Dui Semper Industries',
         false,
         3,
+        '',
         ''
     ),
     (
@@ -216,6 +226,7 @@ VALUES (
         'Lobortis Class Company',
         false,
         1,
+        '',
         ''
     ),
     (
@@ -235,6 +246,7 @@ VALUES (
         'A Aliquet Vel Foundation',
         true,
         3,
+        '',
         ''
     ),
     (
@@ -254,6 +266,7 @@ VALUES (
         'Vulputate Risus LLP',
         false,
         2,
+        '',
         ''
     ),
     (
@@ -273,6 +286,7 @@ VALUES (
         'Odio Inc.',
         false,
         1,
+        '',
         ''
     ),
     (
@@ -292,6 +306,7 @@ VALUES (
         'Nec Ante Maecenas Corp.',
         true,
         1,
+        '',
         ''
     ),
     (
@@ -311,6 +326,7 @@ VALUES (
         'Enim Suspendisse Corporation',
         false,
         3,
+        '',
         ''
     ),
     (
@@ -330,6 +346,7 @@ VALUES (
         'Tempus Non Foundation',
         true,
         2,
+        '',
         ''
     ),
     (
@@ -349,6 +366,7 @@ VALUES (
         'Ante Iaculis Nec Consulting',
         false,
         3,
+        '',
         ''
     ),
     (
@@ -368,6 +386,7 @@ VALUES (
         'Namoa Inc',
         false,
         3,
+        '',
         ''
     ),
     (
@@ -387,6 +406,7 @@ VALUES (
         'Magna Foundation',
         false,
         3,
+        '',
         ''
     ),
     (
@@ -406,6 +426,7 @@ VALUES (
         'Mauris Eu Turpis Inc.',
         true,
         3,
+        '',
         ''
     );
 INSERT INTO users_follower(crea_date, follower_user_id, followed_user_id)
