@@ -33,13 +33,167 @@ return function (App $app) {
 
 	$app->group('/api', function (RouteCollectorProxy $group) {
 		$group->group('/posts', function (RouteCollectorProxy $group) {
-			/**
-			 * Get all post thumbnails
-			 */
-			$group->get('/thumbnails', function (Request $request, Response $response, $args) {
+
+			// Get all post thumbnails
+			$group->get('/thumbnails/{params}', function (Request $request, Response $response, $args) {
 				$postsDAO = new PostsDAO();
-				return resolveResponse($response, 200, $postsDAO->getThumbnails());
+
+				switch ($args['params']) {
+					case 'unlogged':
+						return resolveResponse($response, 200, $postsDAO->getThumbnailsUnlogged());
+						break;
+					case 'newpost':
+						return resolveResponse($response, 200, $postsDAO->getThumbnailsNewPosts());
+						break;
+					case 'hottest':
+						return resolveResponse($response, 200, $postsDAO->getThumbnailsHottests());
+						break;
+					case 'raising':
+						return resolveResponse($response, 200, $postsDAO->getThumbnailsRaising());
+						break;
+					default:
+						return resolveResponse($response, 200, $postsDAO->getThumbnailsUnlogged());
+						break;
+				}
 			});
+
+			$group->group('/{id}', function (RouteCollectorProxy $group) {
+				$group->get('', function (Request $request, Response $response, $args) {
+					$query_params = $request->getQueryParams();
+					$postsDAO = new PostsDAO();
+					$post = $postsDAO->getPostAndUserByPostId([
+						':post_id' => $args['id'],
+						':user_id' => $query_params['user_id']
+					]);
+					if (empty($post)) {
+						return resolveResponse($response, 500, ["message" => "The post with this id (" . $args["id"] . ") is not found."]);
+					}
+					$postsDAO->view($args['id']);
+					return resolveResponse($response, 200, $post);
+				});
+
+				$group->get('/categories', function (Request $request, Response $response, $args) {
+					$postsDAO = new PostsDAO();
+					$categories = $postsDAO->getCategoriesByPostId($args['id']);
+
+					if (empty($categories)) {
+						return resolveResponse($response, 500, ["message" => "The post with this id (" . $args["id"] . ") is not found."]);
+					}
+
+					return resolveResponse($response, 200, $categories);
+				});
+
+				$group->get('/tags', function (Request $request, Response $response, $args) {
+					$postsDAO = new PostsDAO();
+					$tags = $postsDAO->getTagsByPostId($args['id']);
+
+					return resolveResponse($response, 200, $tags);
+				});
+
+				$group->get('/pictures', function (Request $request, Response $response, $args) {
+					$postsDAO = new PostsDAO();
+					$pictures = $postsDAO->getPicturesByPostId($args['id']);
+
+					if (empty($pictures)) {
+						return resolveResponse($response, 500, ["message" => "The post with this id (" . $args["id"] . ") is not found."]);
+					}
+
+					return resolveResponse($response, 200, $pictures);
+				});
+
+				$group->get('/comments', function (Request $request, Response $response, $args) {
+					$postsDAO = new PostsDAO();
+					$comments = $postsDAO->getCommentByPostId($args['id']);
+
+					return resolveResponse($response, 200, $comments);
+				});
+
+				$group->post('/comments', function (Request $request, Response $response, $args) {
+					$postsDAO = new PostsDAO();
+
+					$body = json_decode($request->getBody()->getContents(), true);
+
+					$postsDAO->newComment([
+						':content' => $body['content'],
+						':crea_date' => $body['crea_date'],
+						':reply_to' => $body['reply_to'],
+						':user_id' => $body['user_id'],
+						':post_id' => $args['id']
+					]);
+
+					return resolveResponse($response, 200, ["message" => 'Comment successfully added']);
+				});
+
+				$group->get('/opinion', function (Request $request, Response $response, $args) {$postsDAO = new PostsDAO();
+					$postsDAO = new PostsDAO();
+					$opinions = $postsDAO->getOpinion($args['id']);
+
+					return resolveResponse($response, 200, [
+						'likes' => $opinions[1] ?? 0,
+						'dislikes' => $opinions[0] ?? 0
+					]);
+				});
+
+				$group->post('/opinion', function (Request $request, Response $response, $args) {
+					$postsDAO = new PostsDAO();
+					$body = json_decode($request->getBody()->getContents(), true);
+
+					switch ($body['action']) {
+						case 'like':
+							$postsDAO->setOpinion([
+								':post_id' => $args['id'],
+								':user_id' => $body['user_id'],
+								':crea_date' => $body['crea_date'],
+								':is_like' => 1
+							]);
+							break;
+						case 'dislike':
+							$postsDAO->setOpinion([
+								':post_id' => $args['id'],
+								':user_id' => $body['user_id'],
+								':crea_date' => $body['crea_date'],
+								':is_like' => 0
+							]);
+							break;
+						case 'remove':
+							$postsDAO->rmOpinion([
+								':post_id' => $args['id'],
+								':user_id' => $body['user_id']
+							]);
+							break;
+						default:
+							return resolveResponse($response, 400, ['message', 'Invalid action']);
+					}
+
+					return resolveResponse($response, 200, ['message', 'Opinion successfully saved']);
+				});
+
+				$group->patch('/view', function (Request $request, Response $response, $args) {
+					$postsDAO = new PostsDAO();
+
+					$postsDAO->view($args['id']);
+				});
+
+				$group->patch('/cancel-like', function (Request $request, Response $response, $args) {
+					$postsDAO = new PostsDAO();
+					$body = json_decode($request->getBody()->getContents());
+
+					$postsDAO->rmLike([
+						'post_id' => $args['id'],
+						'user_id' => $body['user_id']
+					]);
+
+					return resolveResponse($response, 200, ["message" => 'Like successfully removed']);
+				});
+
+				$group->get('/discover', function (Request $request, Response $response, $args) {
+					$postsDAO = new PostsDAO();
+					$comments = $postsDAO->getThumbnailsDiscover($args['id']);
+
+					return resolveResponse($response, 200, $comments);
+				});
+			});
+
 		});
 
 		$group->group('/users', function (RouteCollectorProxy $group) {

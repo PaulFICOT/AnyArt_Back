@@ -7,7 +7,8 @@ SELECT
     ,users1.profile_desc
     ,users1.job_function
     ,users1.open_to_work
-    ,pictures.url AS 'profile_pic'
+    ,(SELECT picture.url FROM picture
+        WHERE picture.user_id = users1.user_id AND picture.post_id IS NULL) profile_pic
     ,(SELECT COUNT(followed_user_id) FROM users_follower AS users_follower2
         WHERE users_follower2.followed_user_id = users1.user_id) AS 'Followers'
     ,(SELECT SUM(posts_view2.view_count) FROM posts AS posts2
@@ -18,6 +19,4 @@ SELECT
         WHERE posts3.user_id = 2 AND posts_like3.is_like = TRUE) AS 'Likes'
 FROM users users1
 
-INNER JOIN picture AS pictures ON (users1.user_id = pictures.user_id AND pictures.is_thumbnail = TRUE)
-
-WHERE users1.user_id = 2
+WHERE users1.user_id = :user_id
