@@ -43,6 +43,7 @@ CREATE TABLE users(
    job_function VARCHAR(100),
    open_to_work BOOLEAN NOT NULL,
    country_id INT NOT NULL,
+   token VARCHAR(255),
    PRIMARY KEY(user_id),
    UNIQUE(mail),
    FOREIGN KEY(country_id) REFERENCES countries(country_id),
@@ -121,7 +122,8 @@ CREATE TABLE posts_like(
    crea_date DATETIME NOT NULL,
    user_id INT NOT NULL,
    post_id INT NOT NULL,
-   PRIMARY KEY(like_id),
+   PRIMARY KEY(user_id, post_id),
+   UNIQUE(like_id),
    FOREIGN KEY(user_id) REFERENCES users(user_id),
    FOREIGN KEY(post_id) REFERENCES posts(post_id)
    ON DELETE CASCADE
