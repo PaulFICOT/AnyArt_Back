@@ -46,6 +46,49 @@ SELECT
 		return $sth->fetch(PDO::FETCH_ASSOC) ?: [];
 	}
 
+	public function getThumbnailsResearch($keywords): array {
+        $maxView = 1500;
+
+        $sth = $this->database->prepare("
+        SELECT
+             p.post_id
+            ,p2.url
+            FROM users u
+
+        INNER JOIN posts p ON (u.user_id = p.user_id)
+        INNER JOIN picture p2 ON (p.post_id = p2.post_id AND p2.is_thumbnail = TRUE)
+        INNER JOIN posts_view pv ON (p.post_id = pv.post_id)
+        INNER JOIN posts_category_list l on p.post_id = l.post_id
+        INNER JOIN categories c3 on l.category_id = c3.category_id
+        INNER JOIN posts_tag t on p.post_id = t.post_id
+
+        WHERE u.user_id <> :user AND pv.view_count < :maxView
+        GROUP BY p.post_id, u.username, p.title, p2.picture_id, p2.url
+        ORDER BY (
+            SELECT
+                MAX(MATCH(u2.username, u2.job_function) AGAINST(:keywords) +
+                    MATCH(p3.title, p3.content) AGAINST (:keywords) +
+                    MATCH(c.category) AGAINST(:keywords) +
+                    MATCH(pt.tag) AGAINST(:keywords) +
+                    MATCH(c2.country) AGAINST(:keywords)
+                )
+            FROM users u2
+            INNER JOIN posts p3 on u2.user_id = p3.user_id
+            INNER JOIN posts_category_list pcl on p3.post_id = pcl.post_id
+            INNER JOIN categories c on pcl.category_id = c.category_id
+            INNER JOIN posts_tag pt on p3.post_id = pt.post_id
+            INNER JOIN countries c2 on u2.country_id = c2.country_id
+            WHERE p.post_id = p3.post_id
+        ) DESC
+        ");
+        
+		$sth->execute(array(
+            ':maxView' => $maxView,
+            ':keywords' => $keywords));
+
+		return $sth->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
 	public function getThumbnailsUnlogged(): array {
 		$sth = $this->database->prepare("
             SELECT
@@ -199,6 +242,19 @@ SELECT
 		$sth->execute(array(':id' => $id));
 
 		return $sth->fetch(PDO::FETCH_ASSOC) ?: [];
+	}
+
+	public function getCategories():array {
+		$sth = $this->database->prepare("
+		SELECT
+    		 categories.category_id
+			,categories.category
+		FROM categories
+		");
+
+		$sth->execute();
+
+		return $sth->fetchAll(PDO::FETCH_ASSOC) ?: [];
 	}
 
 	public function getTagsByPostId($id): array {

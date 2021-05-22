@@ -32,9 +32,19 @@ return function (App $app) {
 	});
 
 	$app->group('/api', function (RouteCollectorProxy $group) {
+
+		$group->group('/categories', function(RouteCollectorProxy $group) {
+
+			$group->get('', function (Request $request, Response $response, $args) {
+				$postsDAO = new PostsDAO();
+				
+				return resolveResponse($response, 200, $postsDAO->getCategories());
+			});
+
+		});
+
 		$group->group('/posts', function (RouteCollectorProxy $group) {
 
-			// Get all post thumbnails
 			$group->get('/thumbnails/{params}', function (Request $request, Response $response, $args) {
 				$postsDAO = new PostsDAO();
 
@@ -51,6 +61,8 @@ return function (App $app) {
 					case 'raising':
 						return resolveResponse($response, 200, $postsDAO->getThumbnailsRaising());
 						break;
+					case 'research':
+						return resolveResponse($response,200,$postsDAO->getThumbnailsResearch($args['keywords']));
 					default:
 						return resolveResponse($response, 200, $postsDAO->getThumbnailsUnlogged());
 						break;
