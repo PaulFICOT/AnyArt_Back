@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\CountriesDAO;
 use App\PostsDAO;
 use App\UsersDAO;
+use App\CategoriesDAO;
 use Library\Middleware\CorsMiddleware;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -33,25 +34,12 @@ return function (App $app) {
 
 	$app->group('/api', function (RouteCollectorProxy $group) {
 
-		$group->group('/categories', function(RouteCollectorProxy $group) {
-
-			$group->get('', function (Request $request, Response $response, $args) {
-				$postsDAO = new PostsDAO();
-				
-				return resolveResponse($response, 200, $postsDAO->getCategories());
-			});
-
-		});
-
 		$group->group('/posts', function (RouteCollectorProxy $group) {
 
 			$group->get('/thumbnails/{params}', function (Request $request, Response $response, $args) {
 				$postsDAO = new PostsDAO();
 
 				switch ($args['params']) {
-					case 'unlogged':
-						return resolveResponse($response, 200, $postsDAO->getThumbnailsUnlogged());
-						break;
 					case 'newpost':
 						return resolveResponse($response, 200, $postsDAO->getThumbnailsNewPosts());
 						break;
@@ -63,6 +51,7 @@ return function (App $app) {
 						break;
 					case 'research':
 						return resolveResponse($response,200,$postsDAO->getThumbnailsResearch($args['keywords']));
+					case 'unlogged':
 					default:
 						return resolveResponse($response, 200, $postsDAO->getThumbnailsUnlogged());
 						break;
@@ -329,6 +318,11 @@ return function (App $app) {
 			}
 
 			return resolveResponse($response, 400, ["message" => "Invalid email or password"]);
+		});
+
+		$group->get('/categories', function (Request $request, Response $response, $args) {
+			$categoriesDAO = new CategoriesDAO();
+			return resolveResponse($response, 200, $categoriesDAO->getAll());
 		});
 
 		/**

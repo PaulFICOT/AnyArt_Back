@@ -81,7 +81,7 @@ SELECT
             WHERE p.post_id = p3.post_id
         ) DESC
         ");
-        
+
 		$sth->execute(array(
             ':maxView' => $maxView,
             ':keywords' => $keywords));
@@ -242,19 +242,6 @@ SELECT
 		$sth->execute(array(':id' => $id));
 
 		return $sth->fetch(PDO::FETCH_ASSOC) ?: [];
-	}
-
-	public function getCategories():array {
-		$sth = $this->database->prepare("
-		SELECT
-    		 categories.category_id
-			,categories.category
-		FROM categories
-		");
-
-		$sth->execute();
-
-		return $sth->fetchAll(PDO::FETCH_ASSOC) ?: [];
 	}
 
 	public function getTagsByPostId($id): array {
