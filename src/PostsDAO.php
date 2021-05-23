@@ -361,4 +361,15 @@ SELECT
 
 		return $sth->fetchAll(PDO::FETCH_KEY_PAIR) ?: [];
 	}
+
+	public function createPost($values) {
+		$sth = $this->database->prepare("
+			INSERT INTO posts(title, content, crea_date, upd_date, user_id)
+			VALUE (:title, :desc, :crea_date, :upt_date, :user_id);
+		");
+
+		$sth->execute($values);
+
+		return $this->database->lastInsertId();
+	}
 }
