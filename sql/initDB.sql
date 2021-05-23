@@ -153,6 +153,21 @@ CREATE TABLE posts_view(
 )
 ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
+CREATE TABLE notifications(
+   id_notification INT NOT NULL AUTO_INCREMENT,
+   text VARCHAR(255) NOT NULL,
+   is_read BOOLEAN NOT NULL,
+   crea_date DATETIME NOT NULL,
+   user_id INT NOT NULL,
+   post_id INT NOT NULL,
+   PRIMARY KEY(id_notification),
+   FOREIGN KEY(post_id) REFERENCES posts(post_id)
+   ON DELETE CASCADE,
+   FOREIGN KEY(user_id) REFERENCES users(user_id)
+
+)
+ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
+
 CREATE TABLE picture(
    picture_id INT NOT NULL AUTO_INCREMENT,
    url VARCHAR(255) NOT NULL,
