@@ -146,6 +146,60 @@ class UsersDAO extends DbConnection {
         return $sth->rowCount() == 1;
     }
 
+    public function addFollower($follower, $followed): bool {
+        $date = new DateTime("now", new DateTimeZone('Europe/Paris'));
+        $sth = $this->database->prepare("
+            INSERT INTO
+                users_follower(crea_date, follower_user_id, followed_user_id)
+            VALUE(
+                :crea_date
+                ,:follower
+                ,:follwed
+            )
+        ");
+
+        $sth->execute([
+            ':crea_date' => strval($date->format('Y-m-d H:i:s')),
+            ':follower' => $follower,
+            ':follwed' => $followed,
+        ]);
+
+        return true;
+    }
+
+    public function removeFollower($follower, $followed): bool {
+        $sth = $this->database->prepare("
+            DELETE FROM users_follower
+            WHERE follower_user_id = :follower AND followed_user_id = :followed
+        ");
+
+        $sth->execute([
+            ':follower' => $follower,
+            ':followed' => $followed,
+        ]);
+
+        return true;
+    }
+
+
+    public function isFollowing($follower, $followed): bool {
+        $sth = $this->database->prepare("
+            SELECT
+                COUNT(follower_id) AS 'is_followed'
+            FROM users_follower
+
+            WHERE follower_user_id = :follower
+            AND followed_user_id = :followed
+        ");
+
+        $sth->execute([
+            ':follower' => $follower,
+            ':followed' => $followed,
+        ]);
+
+        return $sth->fetch(PDO::FETCH_ASSOC)['is_followed'] >= 1;
+    }
+
     public function modifyUserPassword($user_id, $password): bool {
         $password_hash = password_hash($password, PASSWORD_DEFAULT);
         $sth = $this->database->prepare("UPDATE users SET

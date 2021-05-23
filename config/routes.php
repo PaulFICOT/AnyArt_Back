@@ -294,6 +294,27 @@ return function (App $app) {
 				return resolveResponse($response, 200, ["user" => $user]);
 			});
 
+			/**
+			 * Follow or unfollow a user
+			 */
+			$group->post('/{followed}/{follower}', function (Request $request, Response $response, $args) {
+				$usersDAO = new UsersDAO();
+				$param = json_decode(strval($request->getBody()), true);
+				if ($param["mode"] == "add") {
+					$usersDAO->addFollower($args['follower'], $args['followed']);
+				} else {
+					$usersDAO->removeFollower($args['follower'], $args['followed']);
+				}
+				return resolveResponse($response, 200, ["message" => "Follow " . $param["mode"], "is_followed" => $usersDAO->isFollowing($args['follower'], $args['followed'])]);
+			});
+
+			/**
+			 * Check if a user is followed by another user
+			 */
+			$group->get('/{followed}/{follower}', function (Request $request, Response $response, $args) {
+				$usersDAO = new UsersDAO();
+				return resolveResponse($response, 200, ["is_followed" => $usersDAO->isFollowing($args['follower'], $args['followed'])]);
+			});
 		});
 
 		$group->group('/countries', function (RouteCollectorProxy $group) {
