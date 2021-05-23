@@ -6,6 +6,7 @@ use App\CountriesDAO;
 use App\PostsDAO;
 use App\UsersDAO;
 use App\CategoriesDAO;
+use App\NotificationsDAO;
 use Library\Middleware\CorsMiddleware;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -323,6 +324,22 @@ return function (App $app) {
 		$group->get('/categories', function (Request $request, Response $response, $args) {
 			$categoriesDAO = new CategoriesDAO();
 			return resolveResponse($response, 200, $categoriesDAO->getAll());
+		});
+
+		$group->post('/notifications', function (Request $request, Response $response, $args) {
+			$notificationsDAO = new NotificationsDAO();
+			$param = json_decode(strval($request->getBody()), true);
+
+			foreach ($param["notification_ids"] as $notification_id) {
+				$notificationsDAO->setReadNotificationById($notification_id);
+			}
+
+			return resolveResponse($response, 200, ["message" => "done"]);
+		});
+
+		$group->get('/notifications/{id}', function (Request $request, Response $response, $args) {
+			$notificationsDAO = new NotificationsDAO();
+			return resolveResponse($response, 200, ["notifications" => $notificationsDAO->getNotificationsByUserId($args['id'])]);
 		});
 
 		/**
