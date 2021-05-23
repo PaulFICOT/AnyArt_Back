@@ -175,12 +175,14 @@ CREATE TABLE picture(
    picture_id INT NOT NULL AUTO_INCREMENT,
    url VARCHAR(255) NOT NULL,
    is_thumbnail BOOLEAN NOT NULL,
+   thumb_of INT,
    user_id INT NOT NULL,
    post_id INT,
    PRIMARY KEY(picture_id),
    UNIQUE(url),
    FOREIGN KEY(user_id) REFERENCES users(user_id),
-   FOREIGN KEY(post_id) REFERENCES posts(post_id)
+   FOREIGN KEY(post_id) REFERENCES posts(post_id),
+   FOREIGN KEY(thumb_of) REFERENCES picture(picture_id)
    ON DELETE CASCADE
 )
 ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
