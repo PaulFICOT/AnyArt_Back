@@ -35,7 +35,18 @@ return function (App $app) {
 	});
 
 	$app->get('/image/{id}', function (Request $request, Response $response, $args) {
-		//TODO
+		$pictureDAO = new PictureDAO();
+		$file = $pictureDAO->getUrlById($args['id']);
+
+		if (!file_exists($file)) {
+			return resolveResponse($response, 400, ['message' => "Image doesn't exist"]);
+		}
+		$image = file_get_contents($file);
+		if ($image === false) {
+			return resolveResponse($response, 400, ['message' => 'Unable to get image']);
+		}
+		$response->getBody()->write($image);
+		return $response->withHeader('Content-Type', 'image/png');
 	});
 
 	$app->group('/api', function (RouteCollectorProxy $group) {

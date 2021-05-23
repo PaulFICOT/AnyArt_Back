@@ -7,11 +7,15 @@ namespace App;
 use PDO;
 
 class PictureDAO extends DbConnection {
-	public function getCountries(): array {
-		$sth = $this->database->prepare("SELECT * FROM countries");
-		$sth->execute();
+	public function getUrlById($id): string {
+		$sth = $this->database->prepare("
+			SELECT picture.url
+			FROM picture
+			WHERE picture_id = :picture_id
+		");
+		$sth->execute([':picture_id' => $id]);
 
-		return $sth->fetchAll(PDO::FETCH_ASSOC) ?: [];
+		return $sth->fetch(PDO::FETCH_COLUMN);
 	}
 	public function insertPicture($values) {
 		$sth = $this->database->prepare("
