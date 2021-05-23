@@ -675,6 +675,17 @@ VALUES (256, 1),
     (745, 18),
     (624, 19),
     (663, 20);
+INSERT INTO notifications (text,is_read,crea_date,user_id,post_id)
+VALUES ('lacus vestibulum',False,'2021-05-21 03:06:36',3,16),
+    ('turpis. Nulla aliquet. Proin velit.',False,'2021-05-11 02:21:16',2,19),
+       ('tempus risus. Donec egestas. Duis',False,'2021-05-16 10:16:27',8,2),
+       ('interdum. Nunc sollicitudin commodo',True,'2021-05-11 08:33:01',8,2),
+       ('mus. Proin vel arcu eu',False,'2021-05-06 04:20:26',5,16),
+       ('nunc sed pede. Cum sociis',True,'2021-05-07 21:14:37',7,12),
+       ('arcu. Vivamus sit',False,'2021-05-05 15:28:49',7,7),
+       ('gravida.',False,'2021-05-13 13:06:10',3,4),
+       ('natoque penatibus et magnis',True,'2021-05-12 00:21:20',2,12),
+       ('ut',False,'2021-05-02 14:15:38',8,10);
 INSERT INTO picture(url, is_thumbnail, user_id, post_id)
 VALUES  ('KfPwby-UisA', FALSE, 1, NULL),
     ('9giow4jXrzM', FALSE, 2, NULL),
