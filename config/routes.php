@@ -83,11 +83,22 @@ return function (App $app) {
 
 				$post_id = $postsDAO->createPost([
 					':title' => $body['title'],
-					':desc' => 'desc',
+					':desc' => $body['desc'],
 					':crea_date' => $body['crea_date'],
 					':upt_date' => $body['crea_date'],
 					':user_id' => $body['user_id']
 				]);
+				$postsDAO->initView($post_id);
+				$postsDAO->setCategory([
+					':category_id' => $body['category'],
+					':post_id' => $post_id,
+				]);
+				foreach ($body['tags'] as $tag) {
+					$postsDAO->setTag([
+						':post_id' => $post_id,
+						':tag' => $tag,
+					]);
+				}
 				return resolveResponse($response, 200, ['post_id' => $post_id]);
 			});
 
@@ -112,7 +123,7 @@ return function (App $app) {
 						break;
 				}
 			});
-			
+
 			$group->group('/{id}', function (RouteCollectorProxy $group) {
 				$group->get('', function (Request $request, Response $response, $args) {
 					$query_params = $request->getQueryParams();
