@@ -10,7 +10,7 @@ class PostsDAO extends DbConnection {
 
 	public function getPostAndUserByPostId($values): array {
 		$sth = $this->database->prepare("
-SELECT
+			SELECT
 				 posts.post_id
 				,posts.title
 				,posts.user_id
@@ -120,7 +120,7 @@ SELECT
         WHERE u.user_id = :user
         GROUP BY u.username");
         $sth->execute(array(':user' => $id));
-        $keywords = $sth->fetchColumn(0) ?: [];
+        $keywords = $sth->fetchColumn(0) ?: "";
 
         $sth = $this->database->prepare("
         SELECT

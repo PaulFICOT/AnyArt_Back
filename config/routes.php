@@ -22,7 +22,6 @@ function resolveResponse($response, $statusCode, $content) {
 	$response = $response->withStatus($statusCode);
 	$response = $response->withHeader('Content-Type', 'application/json');
 	$response->getBody()->write(json_encode($content));
-
 	return $response;
 }
 
@@ -117,24 +116,31 @@ return function (App $app) {
 
 			$group->get('/thumbnails/{params}', function (Request $request, Response $response, $args) {
 				$postsDAO = new PostsDAO();
+			$group->group('/thumbnails', function (RouteCollectorProxy $group) {
+				$group->get('/newpost', function (Request $request, Response $response, $args) {
+					$postsDAO = new PostsDAO();
 
-				switch ($args['params']) {
-					case 'newpost':
-						return resolveResponse($response, 200, $postsDAO->getThumbnailsNewPosts());
-						break;
-					case 'hottest':
-						return resolveResponse($response, 200, $postsDAO->getThumbnailsHottests());
-						break;
-					case 'raising':
-						return resolveResponse($response, 200, $postsDAO->getThumbnailsRaising());
-						break;
-					case 'research':
-						return resolveResponse($response, 200, $postsDAO->getThumbnailsResearch($args['keywords']));
-					case 'unlogged':
-					default:
-						return resolveResponse($response, 200, $postsDAO->getThumbnailsUnlogged());
-						break;
-				}
+					return resolveResponse($response, 200, $postsDAO->getThumbnailsNewPosts());
+				});
+
+				$group->get('/hottest', function (Request $request, Response $response, $args) {
+					$postsDAO = new PostsDAO();
+
+					return resolveResponse($response, 200, $postsDAO->getThumbnailsHottests());
+				});
+
+				$group->get('/raising', function (Request $request, Response $response, $args) {
+					$postsDAO = new PostsDAO();
+
+					return resolveResponse($response, 200, $postsDAO->getThumbnailsRaising());
+				});
+
+				$group->get('/unlogged', function (Request $request, Response $response, $args) {
+					$postsDAO = new PostsDAO();
+
+					return resolveResponse($response, 200, $postsDAO->getThumbnailsUnlogged());
+				});
+
 			});
 
 			$group->group('/{id}', function (RouteCollectorProxy $group) {
