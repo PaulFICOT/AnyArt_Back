@@ -19,7 +19,6 @@ class PostsDAO extends DbConnection {
 				,users.job_function
 				,users.open_to_work
 				,picture.picture_id
-				,picture.url
 				,posts.content
 				,views.view_count
                 ,:user_id
@@ -92,8 +91,8 @@ class PostsDAO extends DbConnection {
 	public function getThumbnailsUnlogged(): array {
 		$sth = $this->database->prepare("
             SELECT
-                 posts.post_id
-                ,pictures.url
+        		posts.post_id,
+                pictures.picture_id
             FROM posts
 
             INNER JOIN picture AS pictures ON (posts.post_id = pictures.post_id)
@@ -168,7 +167,7 @@ class PostsDAO extends DbConnection {
         $sth = $this->database->prepare("
         SELECT
              posts.post_id
-            ,pictures.url
+            ,pictures.picture_id
         FROM posts
              INNER JOIN picture AS pictures ON (posts.post_id = pictures.post_id)
 
@@ -187,7 +186,7 @@ class PostsDAO extends DbConnection {
         $sth = $this->database->prepare("
         SELECT
             posts.post_id,
-            pictures.url
+            pictures.picture_id
         FROM posts
             INNER JOIN picture AS pictures ON (posts.post_id = pictures.post_id)
 
@@ -208,7 +207,7 @@ class PostsDAO extends DbConnection {
         $sth = $this->database->prepare("
         SELECT
             posts.post_id,
-            pictures.url
+            pictures.picture_id
         FROM posts
         INNER JOIN picture AS pictures ON (posts.post_id = pictures.post_id)
         INNER JOIN posts_view pv on posts.post_id = pv.post_id
@@ -267,13 +266,13 @@ class PostsDAO extends DbConnection {
 		$sth = $this->database->prepare("
 			SELECT
 				 posts.post_id,
-				 pictures.picture_id,
-				 pictures.url
+				 pictures.picture_id
 			FROM posts
 
 			INNER JOIN picture AS pictures ON (posts.post_id = pictures.post_id)
 
 			WHERE posts.post_id = :id
+			AND pictures.is_thumbnail = 0
 		");
 
 		$sth->execute(array(':id' => $id));
@@ -290,7 +289,6 @@ class PostsDAO extends DbConnection {
 				,posts_comment.user_id
 				,users.username
 				,picture.picture_id
-				,picture.url
 				,posts_comment.reply_to
 				,posts_comment.content
 			FROM posts
