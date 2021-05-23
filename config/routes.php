@@ -69,15 +69,17 @@ return function (App $app) {
 			$pictureDAO = new PictureDAO();
 			foreach ($files as $file) {
 				['original' => $original, 'thumbnail' => $thumbnail] = $image_handler->processFile($file, true);
-				$pictureDAO->insertPicture([
+				$originalId = $pictureDAO->insertPicture([
 					':url' => $original,
 					':is_thumbnail' => 0,
+					':thumb_of' => null,
 					':user_id' => $body['user_id'],
 					':post_id' => $body['post_id'],
 				]);
 				$pictureDAO->insertPicture([
 					':url' => $thumbnail,
 					':is_thumbnail' => 1,
+					':thumb_of' => $originalId,
 					':user_id' => $body['user_id'],
 					':post_id' => $body['post_id'],
 				]);
