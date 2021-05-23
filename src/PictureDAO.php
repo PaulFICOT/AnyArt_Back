@@ -15,13 +15,15 @@ class PictureDAO extends DbConnection {
 		");
 		$sth->execute([':picture_id' => $id]);
 
-		return $sth->fetch(PDO::FETCH_COLUMN);
+		return $sth->fetch(PDO::FETCH_COLUMN) ?: '';
 	}
-	public function insertPicture($values) {
+	public function insertPicture($values): string {
 		$sth = $this->database->prepare("
-			INSERT INTO picture(url, is_thumbnail, user_id, post_id)
-			VALUE (:url, :is_thumbnail, :user_id, :post_id)
+			INSERT INTO picture(url, is_thumbnail, thumb_of, user_id, post_id)
+			VALUE (:url, :is_thumbnail, :thumb_of, :user_id, :post_id)
 		");
 		$sth->execute($values);
+
+		return $this->database->lastInsertId();
 	}
 }

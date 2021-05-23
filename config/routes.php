@@ -38,7 +38,7 @@ return function (App $app) {
 		$file = $pictureDAO->getUrlById($args['id']);
 
 		if (!file_exists($file)) {
-			return resolveResponse($response, 400, ['message' => "Image doesn't exist"]);
+			return resolveResponse($response, 404, ['message' => "Image doesn't exist"]);
 		}
 		$image = file_get_contents($file);
 		if ($image === false) {
@@ -68,15 +68,17 @@ return function (App $app) {
 			$pictureDAO = new PictureDAO();
 			foreach ($files as $file) {
 				['original' => $original, 'thumbnail' => $thumbnail] = $image_handler->processFile($file, true);
-				$pictureDAO->insertPicture([
+				$originalId = $pictureDAO->insertPicture([
 					':url' => $original,
 					':is_thumbnail' => 0,
+					':thumb_of' => null,
 					':user_id' => $body['user_id'],
 					':post_id' => $body['post_id'],
 				]);
 				$pictureDAO->insertPicture([
 					':url' => $thumbnail,
 					':is_thumbnail' => 1,
+					':thumb_of' => $originalId,
 					':user_id' => $body['user_id'],
 					':post_id' => $body['post_id'],
 				]);
@@ -157,71 +159,6 @@ return function (App $app) {
 
 					return resolveResponse($response, 200, $comments);
 				});
-			});
-
-			$group->get('/categories', function (Request $request, Response $response, $args) {
-				$postsDAO = new PostsDAO();
-				$categories = $postsDAO->getCategoriesByPostId($args['id']);
-
-				if (empty($categories)) {
-					return resolveResponse($response, 500, ["message" => "The post with this id (" . $args["id"] . ") is not found."]);
-				}
-
-				return resolveResponse($response, 200, $categories);
-			});
-
-			$group->get('/tags', function (Request $request, Response $response, $args) {
-				$postsDAO = new PostsDAO();
-				$tags = $postsDAO->getTagsByPostId($args['id']);
-
-				return resolveResponse($response, 200, $tags);
-			});
-
-			$group->get('/pictures', function (Request $request, Response $response, $args) {
-				$postsDAO = new PostsDAO();
-				$pictures = $postsDAO->getPicturesByPostId($args['id']);
-
-				var_dump($pictures);
-
-				if (empty($pictures)) {
-					return resolveResponse($response, 500, ["message" => "The post with this id (" . $args["id"] . ") is not found."]);
-				}
-
-				return resolveResponse($response, 200, $pictures);
-			});
-
-			$group->get('/comments', function (Request $request, Response $response, $args) {
-				$postsDAO = new PostsDAO();
-				$comments = $postsDAO->getCommentByPostId($args['id']);
-
-				return resolveResponse($response, 200, $comments);
-			});
-
-			$group->post('/comments', function (Request $request, Response $response, $args) {
-				$postsDAO = new PostsDAO();
-
-				$body = json_decode($request->getBody()->getContents(), true);
-
-				$postsDAO->newComment([
-					':content' => $body['content'],
-					':crea_date' => $body['crea_date'],
-					':reply_to' => $body['reply_to'],
-					':user_id' => $body['user_id'],
-					':post_id' => $args['id']
-				]);
-
-				return resolveResponse($response, 200, ["message" => 'Comment successfully added']);
-			});
-
-			$group->get('/opinion', function (Request $request, Response $response, $args) {
-				$postsDAO = new PostsDAO();
-				$postsDAO = new PostsDAO();
-				$opinions = $postsDAO->getOpinion($args['id']);
-
-				return resolveResponse($response, 200, [
-					'likes' => $opinions[1] ?? 0,
-					'dislikes' => $opinions[0] ?? 0
-				]);
 			});
 
 			$group->group('/{id}', function (RouteCollectorProxy $group) {
