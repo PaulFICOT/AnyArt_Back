@@ -61,7 +61,7 @@ class PostsDAO extends DbConnection {
         INNER JOIN categories c3 on l.category_id = c3.category_id
         INNER JOIN posts_tag t on p.post_id = t.post_id
 
-        WHERE u.user_id <> :user AND pv.view_count < :maxView
+        WHERE pv.view_count < :maxView
         GROUP BY p.post_id, u.username, p.title, p2.picture_id, p2.url
         ORDER BY (
             SELECT

@@ -140,16 +140,8 @@ return function (App $app) {
 				});
 
 				$group->get('/research', function (Request $request, Response $response, $args) {
-					$query_params = $request->getQueryParams();
 					$postsDAO = new PostsDAO();
-					$post = $postsDAO->getThumbnailsResearch([
-						':post_id' => $args['id'],
-						':user_id' => $query_params['user_id']
-					]);
-					if (empty($post)) {
-						return resolveResponse($response, 500, ["message" => "The post with this id (" . $args["id"] . ") is not found."]);
-					}
-					$postsDAO->view($args['id']);
+					$post = $postsDAO->getThumbnailsResearch($_GET['search_text']);
 					return resolveResponse($response, 200, $post);
 				});
 
