@@ -39,7 +39,7 @@ return function (App $app) {
 		$file = $pictureDAO->getUrlById($args['id']);
 
 		if (!file_exists($file)) {
-			return resolveResponse($response, 400, ['message' => "Image doesn't exist"]);
+			return resolveResponse($response, 404, ['message' => "Image doesn't exist"]);
 		}
 		$image = file_get_contents($file);
 		if ($image === false) {

@@ -15,7 +15,7 @@ class PictureDAO extends DbConnection {
 		");
 		$sth->execute([':picture_id' => $id]);
 
-		return $sth->fetch(PDO::FETCH_COLUMN);
+		return $sth->fetch(PDO::FETCH_COLUMN) ?: '';
 	}
 	public function insertPicture($values) {
 		$sth = $this->database->prepare("
