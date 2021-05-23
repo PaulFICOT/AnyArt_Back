@@ -2,19 +2,21 @@
 
 declare(strict_types=1);
 
+use App\CategoriesDAO;
 use App\CountriesDAO;
+use App\ImageHandler;
+use App\PictureDAO;
 use App\PostsDAO;
 use App\UsersDAO;
-use App\CategoriesDAO;
+use Lcobucci\JWT\Configuration;
+use Lcobucci\JWT\Signer\Hmac\Sha256;
+use Lcobucci\JWT\Signer\Key\InMemory;
 use Library\Middleware\CorsMiddleware;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\App;
 use Slim\Exception\HttpNotFoundException;
 use Slim\Routing\RouteCollectorProxy;
-use Lcobucci\JWT\Configuration;
-use Lcobucci\JWT\Signer\Hmac\Sha256;
-use Lcobucci\JWT\Signer\Key\InMemory;
 
 function resolveResponse($response, $statusCode, $content) {
 	$response = $response->withStatus($statusCode);
@@ -31,10 +33,87 @@ return function (App $app) {
 		return $response;
 	});
 
+	$app->get('/image/{id}', function (Request $request, Response $response, $args) {
+		$pictureDAO = new PictureDAO();
+		$file = $pictureDAO->getUrlById($args['id']);
+
+		if (!file_exists($file)) {
+			return resolveResponse($response, 400, ['message' => "Image doesn't exist"]);
+		}
+		$image = file_get_contents($file);
+		if ($image === false) {
+			return resolveResponse($response, 400, ['message' => 'Unable to get image']);
+		}
+		$response->getBody()->write($image);
+		return $response->withHeader('Content-Type', 'image/png');
+	});
+
 	$app->group('/api', function (RouteCollectorProxy $group) {
+
+		$group->post('/upload', function (Request $request, Response $response, $args) {
+			$files = $request->getUploadedFiles();
+			$body = json_decode($request->getParsedBody()['data'], true);
+			$prefix = 'u' . $body['user_id'] . 'p' . $body['post_id'];
+			$image_handler = new ImageHandler($prefix);
+			foreach ($files as $file) {
+				if (!$image_handler->checkIntegrity($file)) {
+					return resolveResponse(
+						$response,
+						400,
+						['message' => "{$file->getClientFilename()} type isn't supported"]
+					);
+				}
+			}
+
+			$pictureDAO = new PictureDAO();
+			foreach ($files as $file) {
+				['original' => $original, 'thumbnail' => $thumbnail] = $image_handler->processFile($file, true);
+				$pictureDAO->insertPicture([
+					':url' => $original,
+					':is_thumbnail' => 0,
+					':user_id' => $body['user_id'],
+					':post_id' => $body['post_id'],
+				]);
+				$pictureDAO->insertPicture([
+					':url' => $thumbnail,
+					':is_thumbnail' => 1,
+					':user_id' => $body['user_id'],
+					':post_id' => $body['post_id'],
+				]);
+			}
+
+			return resolveResponse($response, 200, ['message' => 'post successfully created']);
+		});
 
 		$group->group('/posts', function (RouteCollectorProxy $group) {
 
+			$group->post('/new', function (Request $request, Response $response, $args) {
+				$postsDAO = new PostsDAO();
+				$body = json_decode($request->getBody()->getContents(), true);
+
+				$post_id = $postsDAO->createPost([
+					':title' => $body['title'],
+					':desc' => $body['desc'],
+					':crea_date' => $body['crea_date'],
+					':upt_date' => $body['crea_date'],
+					':user_id' => $body['user_id']
+				]);
+				$postsDAO->initView($post_id);
+				$postsDAO->setCategory([
+					':category_id' => $body['category'],
+					':post_id' => $post_id,
+				]);
+				foreach ($body['tags'] as $tag) {
+					$postsDAO->setTag([
+						':post_id' => $post_id,
+						':tag' => $tag,
+					]);
+				}
+				return resolveResponse($response, 200, ['post_id' => $post_id]);
+			});
+
+			$group->get('/thumbnails/{params}', function (Request $request, Response $response, $args) {
+				$postsDAO = new PostsDAO();
 			$group->group('/thumbnails', function (RouteCollectorProxy $group) {
 				$group->get('/newpost', function (Request $request, Response $response, $args) {
 					$postsDAO = new PostsDAO();
@@ -129,7 +208,8 @@ return function (App $app) {
 					return resolveResponse($response, 200, ["message" => 'Comment successfully added']);
 				});
 
-				$group->get('/opinion', function (Request $request, Response $response, $args) {$postsDAO = new PostsDAO();
+				$group->get('/opinion', function (Request $request, Response $response, $args) {
+					$postsDAO = new PostsDAO();
 					$postsDAO = new PostsDAO();
 					$opinions = $postsDAO->getOpinion($args['id']);
 
@@ -267,7 +347,7 @@ return function (App $app) {
 				if (empty($country)) {
 					return resolveResponse($response, 500, ["message" => "The country with this id (" . $args["id"] . ") is not found."]);
 				}
-					return resolveResponse($response, 200, $country);
+				return resolveResponse($response, 200, $country);
 			});
 
 		});
@@ -290,7 +370,7 @@ return function (App $app) {
 					InMemory::plainText('supersecret')
 				);
 
-				$now   = new DateTimeImmutable();
+				$now = new DateTimeImmutable();
 				$token = $config->builder()
 								->identifiedBy('4f1g23a12aa')
 								->issuedAt($now)

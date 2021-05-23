@@ -361,4 +361,42 @@ class PostsDAO extends DbConnection {
 
 		return $sth->fetchAll(PDO::FETCH_KEY_PAIR) ?: [];
 	}
+
+	public function createPost($values) {
+		$sth = $this->database->prepare("
+			INSERT INTO posts(title, content, crea_date, upd_date, user_id)
+			VALUE (:title, :desc, :crea_date, :upt_date, :user_id);
+		");
+
+		$sth->execute($values);
+
+		return $this->database->lastInsertId();
+	}
+
+	public function initView($post_id) {
+		$sth = $this->database->prepare("
+			INSERT INTO posts_view(view_count, post_id)
+			VALUE (0, :post_id);
+		");
+
+		$sth->execute([':post_id' => $post_id]);
+	}
+
+	public function setCategory($values) {
+		$sth = $this->database->prepare("
+			INSERT INTO posts_category_list(post_id, category_id)
+			VALUE (:post_id, :category_id);
+		");
+
+		$sth->execute($values);
+	}
+
+	public function setTag($values) {
+		$sth = $this->database->prepare("
+			INSERT INTO posts_tag(tag, post_id)
+			VALUE (:tag, :post_id);
+		");
+
+		$sth->execute($values);
+	}
 }
