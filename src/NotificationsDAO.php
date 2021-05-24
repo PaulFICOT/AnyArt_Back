@@ -15,7 +15,7 @@ class NotificationsDAO extends DbConnection {
                 is_read,
                 crea_date,
                 target_id,
-                follower_id,
+                follower_user_id,
                 post_id
             FROM notifications
             WHERE target_id = :target_id
