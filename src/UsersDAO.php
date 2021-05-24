@@ -96,32 +96,32 @@ class UsersDAO extends DbConnection {
 
     public function getUserProfileByUserId($user_id): array {
         $sth = $this->database->prepare("
-            SELECT
-                users1.user_id
-                ,users1.username
-                ,users1.is_verified
-                ,users1.is_active
-                ,users1.is_banned
-                ,users1.profile_desc
-                ,users1.job_function
-                ,users1.open_to_work
-                ,users1.mail
-                ,users1.donation_link
-                ,(SELECT picture.url FROM picture
-                    WHERE picture.user_id = users1.user_id AND picture.post_id IS NULL) profile_pic
-                ,(SELECT COUNT(followed_user_id) FROM users_follower AS users_follower2
-                    WHERE users_follower2.followed_user_id = users1.user_id) AS 'Followers'
-                ,(SELECT SUM(posts_view2.view_count) FROM posts AS posts2
-                    INNER JOIN posts_view AS posts_view2 ON (posts2.post_id = posts_view2.post_id)
-                    WHERE posts2.user_id = users1.user_id) AS 'Views'
-                ,(SELECT COUNT(posts_like3.like_id) FROM posts AS posts3
-                    INNER JOIN posts_like AS posts_like3 ON (posts3.post_id = posts_like3.post_id)
-                    WHERE posts3.user_id = users1.user_id AND posts_like3.is_like = TRUE) AS 'Likes'
+        SELECT
+            users1.user_id
+            ,users1.username
+            ,users1.is_verified
+            ,users1.is_active
+            ,users1.is_banned
+            ,users1.profile_desc
+            ,users1.job_function
+            ,users1.open_to_work
+            ,users1.mail
+            ,users1.donation_link
+            ,(SELECT picture.url FROM picture
+                WHERE picture.user_id = users1.user_id AND picture.post_id IS NULL AND picture.thumb_of IS NULL) profile_pic
+            ,(SELECT COUNT(followed_user_id) FROM users_follower AS users_follower2
+                WHERE users_follower2.followed_user_id = users1.user_id) AS 'Followers'
+            ,(SELECT SUM(posts_view2.view_count) FROM posts AS posts2
+                INNER JOIN posts_view AS posts_view2 ON (posts2.post_id = posts_view2.post_id)
+                WHERE posts2.user_id = users1.user_id) AS 'Views'
+            ,(SELECT COUNT(posts_like3.like_id) FROM posts AS posts3
+                INNER JOIN posts_like AS posts_like3 ON (posts3.post_id = posts_like3.post_id)
+                WHERE posts3.user_id = users1.user_id AND posts_like3.is_like = TRUE) AS 'Likes'
             FROM users users1
 
             WHERE users1.user_id = :user_id
         ");
-		$sth->execute(array(':user_id' => $user_id));
+		$sth->execute([':user_id' => $user_id]);
 
         return $sth->fetch(PDO::FETCH_ASSOC) ?: [];
     }

@@ -53,7 +53,7 @@ return function (App $app) {
 		$group->post('/upload', function (Request $request, Response $response, $args) {
 			$files = $request->getUploadedFiles();
 			$body = json_decode($request->getParsedBody()['data'], true);
-			$prefix = 'u' . $body['user_id'] . 'p' . $body['post_id'];
+			$prefix = 'u' . $body['user_id'] . (!empty($body['post_id']) ? 'p' . $body['post_id'] : '');
 			$image_handler = new ImageHandler($prefix);
 			foreach ($files as $file) {
 				if (!$image_handler->checkIntegrity($file)) {
@@ -68,18 +68,36 @@ return function (App $app) {
 			$pictureDAO = new PictureDAO();
 			foreach ($files as $file) {
 				['original' => $original, 'thumbnail' => $thumbnail] = $image_handler->processFile($file, true);
-				$pictureDAO->insertPicture([
-					':url' => $original,
-					':is_thumbnail' => 0,
-					':user_id' => $body['user_id'],
-					':post_id' => $body['post_id'],
-				]);
-				$pictureDAO->insertPicture([
-					':url' => $thumbnail,
-					':is_thumbnail' => 1,
-					':user_id' => $body['user_id'],
-					':post_id' => $body['post_id'],
-				]);
+				if (!empty($body['post_id'])) {
+					$pictureDAO->insertPicture([
+						':url' => $original,
+						':is_thumbnail' => 0,
+						':user_id' => $body['user_id'],
+						':post_id' => $body['post_id'],
+					]);
+					$pictureDAO->insertPicture([
+						':url' => $thumbnail,
+						':is_thumbnail' => 0,
+						':user_id' => $body['user_id'],
+						':post_id' => $body['post_id'],
+					]);
+				} else {
+					if ($pictureDAO->hasProfilPicture($body['user_id'])) {
+						$pictureDAO->updatePicture($original, $body['user_id']);
+					} else {
+						$pictureDAO->insertPicture([
+							':url' => $original,
+							':is_thumbnail' => 0,
+							':user_id' => $body['user_id'],
+							':post_id' => NULL,
+						]);
+					}
+				}
+			}
+
+			if (empty($body['post_id'])) {
+				$usersDAO = new UsersDAO();
+				return resolveResponse($response, 200, ['message' => 'Profile picture successfully updated', 'user_profile' => $usersDAO->getUserProfileByUserId($body['user_id']), 'user' => $usersDAO->getUsersById($body['user_id'])]);
 			}
 
 			return resolveResponse($response, 200, ['message' => 'post successfully created']);
@@ -359,6 +377,19 @@ return function (App $app) {
 			});
 
 			/**
+			 * Get all information for the user profile
+			 */
+			$group->get('/profile/{id}', function (Request $request, Response $response, $args) {
+				$usersDAO = new UsersDAO();
+				$user = $usersDAO->getUserProfileByUserId($args['id']);
+
+				if (empty($user)) {
+					return resolveResponse($response, 500, ["message" => "The user with this id (" . $args["id"] . ") is not found."]);
+				}
+				return resolveResponse($response, 200, ["user" => $user]);
+			});
+
+			/**
 			 * Get all users
 			 */
 			$group->get('', function (Request $request, Response $response) {
@@ -379,6 +410,19 @@ return function (App $app) {
 					}
 				}
 				return resolveResponse($response, 200, ["message" => "The user was created successfully."]);
+			});
+
+			/**
+			 * Get a user with the id of this user
+			 */
+			$group->get('/{id}', function (Request $request, Response $response, $args) {
+				$usersDAO = new UsersDAO();
+				$user = $usersDAO->getUsersById($args['id']);
+
+				if (empty($user)) {
+					return resolveResponse($response, 500, ["message" => "The user with this id (" . $args["id"] . ") is not found."]);
+				}
+				return resolveResponse($response, 200, $user);
 			});
 
 			/**
@@ -410,32 +454,6 @@ return function (App $app) {
 
 				$usersDAO->modifyUserPassword($args['id'], $params['new_password']);
 				return resolveResponse($response, 200, ["message" => "Your password was updated successfully."]);
-			});
-
-			/**
-			 * Get a user with the id of this user
-			 */
-			$group->get('/{id}', function (Request $request, Response $response, $args) {
-				$usersDAO = new UsersDAO();
-				$user = $usersDAO->getUsersById($args['id']);
-
-				if (empty($user)) {
-					return resolveResponse($response, 500, ["message" => "The user with this id (" . $args["id"] . ") is not found."]);
-				}
-				return resolveResponse($response, 200, $user);
-			});
-
-			/**
-			 * Get all information for the user profile
-			 */
-			$group->get('/profile/{id}', function (Request $request, Response $response, $args) {
-				$usersDAO = new UsersDAO();
-				$user = $usersDAO->getUserProfileByUserId($args['id']);
-
-				if (empty($user)) {
-					return resolveResponse($response, 500, ["message" => "The user with this id (" . $args["id"] . ") is not found."]);
-				}
-				return resolveResponse($response, 200, ["user" => $user]);
 			});
 
 			/**
