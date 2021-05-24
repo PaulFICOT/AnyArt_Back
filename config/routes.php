@@ -8,6 +8,7 @@ use App\ImageHandler;
 use App\PictureDAO;
 use App\PostsDAO;
 use App\UsersDAO;
+use App\NotificationsDAO;
 use Lcobucci\JWT\Configuration;
 use Lcobucci\JWT\Signer\Hmac\Sha256;
 use Lcobucci\JWT\Signer\Key\InMemory;
@@ -56,34 +57,53 @@ return function (App $app) {
 			$prefix = 'u' . $body['user_id'] . (!empty($body['post_id']) ? 'p' . $body['post_id'] : '');
 			$image_handler = new ImageHandler($prefix);
 			foreach ($files as $file) {
+				if ($file->getError() > 0) {
+					switch ($file->getError()) {
+						case UPLOAD_ERR_INI_SIZE:
+							return resolveResponse(
+								$response,
+								400,
+								['message' => "{$file->getClientFilename()}'s size is to big"]
+							);
+							break;
+						default:
+							return resolveResponse(
+								$response,
+								400,
+								['message' => "Unknown error on {$file->getClientFilename()}"]
+							);
+							break;
+					}
+				}
 				if (!$image_handler->checkIntegrity($file)) {
 					return resolveResponse(
 						$response,
 						400,
-						['message' => "{$file->getClientFilename()} type isn't supported"]
+						['message' => "{$file->getClientFilename()}'s type isn't supported"]
 					);
 				}
 			}
 
 			$pictureDAO = new PictureDAO();
 			foreach ($files as $key => $file) {
-				['original' => $original, 'thumbnail' => $thumbnail] = $image_handler->processFile($file, true);
 				if (!empty($body['post_id'])) {
-				$originalId = $pictureDAO->insertPicture([
-					':url' => $original,
-					':is_thumbnail' => 0,
-					':thumb_of' => null,
-					':user_id' => $body['user_id'],
-					':post_id' => $body['post_id'],
-				]);
-				$pictureDAO->insertPicture([
-					':url' => $thumbnail,
-					':is_thumbnail' => $key == 0 ? 1 : 0,
-					':thumb_of' => $originalId,
-					':user_id' => $body['user_id'],
-					':post_id' => $body['post_id'],
-				]);
+					['original' => $original, 'thumbnail' => $thumbnail] = $image_handler->processFile($file, true);
+					$originalId = $pictureDAO->insertPicture([
+						':url' => $original,
+						':is_thumbnail' => 0,
+						':thumb_of' => null,
+						':user_id' => $body['user_id'],
+						':post_id' => $body['post_id'],
+					]);
+					$pictureDAO->insertPicture([
+						':url' => $thumbnail,
+						':is_thumbnail' => $key == 0 ? 1 : 0,
+						':thumb_of' => $originalId,
+						':user_id' => $body['user_id'],
+						':post_id' => $body['post_id'],
+					]);
 				} else {
+					['original' => $original] = $image_handler->processFile($file, false);
 					if ($pictureDAO->hasProfilPicture($body['user_id'])) {
 						$pictureDAO->updatePicture($original, $body['user_id']);
 					} else {
@@ -527,6 +547,22 @@ return function (App $app) {
 		$group->get('/categories', function (Request $request, Response $response, $args) {
 			$categoriesDAO = new CategoriesDAO();
 			return resolveResponse($response, 200, $categoriesDAO->getAll());
+		});
+
+		$group->post('/notifications', function (Request $request, Response $response, $args) {
+			$notificationsDAO = new NotificationsDAO();
+			$param = json_decode(strval($request->getBody()), true);
+
+			foreach ($param["notification_ids"] as $notification_id) {
+				$notificationsDAO->setReadNotificationById($notification_id);
+			}
+
+			return resolveResponse($response, 200, ["message" => "done"]);
+		});
+
+		$group->get('/notifications/{id}', function (Request $request, Response $response, $args) {
+			$notificationsDAO = new NotificationsDAO();
+			return resolveResponse($response, 200, ["notifications" => $notificationsDAO->getNotificationsByUserId($args['id'])]);
 		});
 
 		/**
