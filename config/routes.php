@@ -19,6 +19,12 @@ use Slim\App;
 use Slim\Exception\HttpNotFoundException;
 use Slim\Routing\RouteCollectorProxy;
 
+/**
+ * @param $response
+ * @param $statusCode
+ * @param $content
+ * @return mixed
+ */
 function resolveResponse($response, $statusCode, $content) {
 	$response = $response->withStatus($statusCode);
 	$response = $response->withHeader('Content-Type', 'application/json');
@@ -34,6 +40,9 @@ return function (App $app) {
 		return $response;
 	});
 
+	/*
+	 * Display the image with the given id
+	 */
 	$app->get('/image/{id}', function (Request $request, Response $response, $args) {
 		$pictureDAO = new PictureDAO();
 		$file = $pictureDAO->getUrlById($args['id']);
@@ -49,8 +58,14 @@ return function (App $app) {
 		return $response->withHeader('Content-Type', 'image/png');
 	});
 
+	/*
+	 * /api/*
+	 */
 	$app->group('/api', function (RouteCollectorProxy $group) {
 
+		/*
+		 * Upload an image
+		 */
 		$group->post('/upload', function (Request $request, Response $response, $args) {
 			$files = $request->getUploadedFiles();
 			$body = json_decode($request->getParsedBody()['data'], true);
@@ -123,8 +138,14 @@ return function (App $app) {
 			return resolveResponse($response, 200, ['message' => 'post successfully created']);
 		});
 
+		/*
+		 * /api/posts/*
+		 */
 		$group->group('/posts', function (RouteCollectorProxy $group) {
 
+			/*
+			 * Create a new post
+			 */
 			$group->post('/new', function (Request $request, Response $response, $args) {
 				$postsDAO = new PostsDAO();
 				$body = json_decode($request->getBody()->getContents(), true);
@@ -150,37 +171,58 @@ return function (App $app) {
 				return resolveResponse($response, 200, ['post_id' => $post_id]);
 			});
 
+			/*
+			 * /api/posts/thumbnails/*
+			 */
 			$group->group('/thumbnails', function (RouteCollectorProxy $group) {
+				/*
+				 * get the newpost thumbnails
+				 */
 				$group->get('/newpost', function (Request $request, Response $response, $args) {
 					$postsDAO = new PostsDAO();
 					$filters = (!empty($_GET['filters']) ? explode(',', $_GET['filters']) : []);
 					return resolveResponse($response, 200, $postsDAO->getThumbnailsNewPosts($filters));
 				});
 
+				/*
+				 * get the hottest thumbnails
+				 */
 				$group->get('/hottest', function (Request $request, Response $response, $args) {
 					$postsDAO = new PostsDAO();
 					$filters = (!empty($_GET['filters']) ? explode(',', $_GET['filters']) : []);
 					return resolveResponse($response, 200, $postsDAO->getThumbnailsHottests($filters));
 				});
 
+				/*
+				 * Get the raising thumbnails
+				 */
 				$group->get('/raising', function (Request $request, Response $response, $args) {
 					$postsDAO = new PostsDAO();
 					$filters = (!empty($_GET['filters']) ? explode(',', $_GET['filters']) : []);
 					return resolveResponse($response, 200, $postsDAO->getThumbnailsRaising($filters));
 				});
 
+				/*
+				 * Get the unlogged thumbnails
+				 */
 				$group->get('/unlogged', function (Request $request, Response $response, $args) {
 					$postsDAO = new PostsDAO();
 					$filters = (!empty($_GET['filters']) ? explode(',', $_GET['filters']) : []);
 					return resolveResponse($response, 200, $postsDAO->getThumbnailsUnlogged($filters));
 				});
 
+				/*
+				 * Get the research thumbnails
+				 */
 				$group->get('/research', function (Request $request, Response $response, $args) {
 					$postsDAO = new PostsDAO();
 					$post = $postsDAO->getThumbnailsResearch($_GET['search_text']);
 					return resolveResponse($response, 200, $post);
 				});
 
+				/*
+				 * Get the discover thumbnails for a user
+				 */
 				$group->get('/{id}/discover', function (Request $request, Response $response, $args) {
 					$postsDAO = new PostsDAO();
 					$filters = (!empty($_GET['filters']) ? explode(',', $_GET['filters']) : []);
@@ -196,7 +238,13 @@ return function (App $app) {
 				return resolveResponse($response, 200, ["thumbnails" => $postsDAO->getThumbnailsByUserId($args['id'])]);
 			});
 
+			/*
+			 * /api/posts/{id}/*
+			 */
 			$group->group('/{id}', function (RouteCollectorProxy $group) {
+				/*
+				 * Get the post with id {id}
+				 */
 				$group->get('', function (Request $request, Response $response, $args) {
 					$postsDAO = new PostsDAO();
 					$post = $postsDAO->getPostAndUserByPostId([
@@ -210,6 +258,9 @@ return function (App $app) {
 					return resolveResponse($response, 200, $post);
 				});
 
+				/*
+				 * Delete the post at id {id}
+				 */
 				$group->delete('', function (Request $request, Response $response, $args) {
 					$postsDAO = new PostsDAO();
 					$postsDAO->rmPost($args['id']);
@@ -217,6 +268,9 @@ return function (App $app) {
 					return resolveResponse($response, 200, ['message' => 'Post successfully deleted']);
 				});
 
+				/*
+				 * Get the categories of the post
+				 */
 				$group->get('/categories', function (Request $request, Response $response, $args) {
 					$postsDAO = new PostsDAO();
 					$categories = $postsDAO->getCategoriesByPostId($args['id']);
@@ -228,6 +282,9 @@ return function (App $app) {
 					return resolveResponse($response, 200, $categories);
 				});
 
+				/*
+				* Get the tags of the post
+				*/
 				$group->get('/tags', function (Request $request, Response $response, $args) {
 					$postsDAO = new PostsDAO();
 					$tags = $postsDAO->getTagsByPostId($args['id']);
@@ -235,6 +292,9 @@ return function (App $app) {
 					return resolveResponse($response, 200, $tags);
 				});
 
+				/*
+				* Get the pictures of the post
+				*/
 				$group->get('/pictures', function (Request $request, Response $response, $args) {
 					$postsDAO = new PostsDAO();
 					$pictures = $postsDAO->getPicturesByPostId($args['id']);
@@ -246,6 +306,9 @@ return function (App $app) {
 					return resolveResponse($response, 200, $pictures);
 				});
 
+				/*
+				* Get the comments of the post
+				*/
 				$group->get('/comments', function (Request $request, Response $response, $args) {
 					$postsDAO = new PostsDAO();
 					$comments = $postsDAO->getCommentByPostId($args['id']);
@@ -253,6 +316,9 @@ return function (App $app) {
 					return resolveResponse($response, 200, $comments);
 				});
 
+				/*
+				* Add a comment for the post with id {id}
+				*/
 				$group->post('/comments', function (Request $request, Response $response, $args) {
 					$postsDAO = new PostsDAO();
 
@@ -269,6 +335,9 @@ return function (App $app) {
 					return resolveResponse($response, 200, ["message" => 'Comment successfully added']);
 				});
 
+				/*
+				* Get the opinions of the post
+				*/
 				$group->get('/opinion', function (Request $request, Response $response, $args) {
 					$postsDAO = new PostsDAO();
 					$postsDAO = new PostsDAO();
@@ -280,6 +349,9 @@ return function (App $app) {
 					]);
 				});
 
+				/*
+				* Like / Dislike / Cancel or Switch the opinion of the post for a user
+				*/
 				$group->post('/opinion', function (Request $request, Response $response, $args) {
 					$postsDAO = new PostsDAO();
 					$body = json_decode($request->getBody()->getContents(), true);
@@ -323,7 +395,9 @@ return function (App $app) {
 
 		});
 
-
+		/*
+		 * /api/users/*
+		 */
 		$group->group('/users', function (RouteCollectorProxy $group) {
 			/**
 			 * Check the user token
@@ -437,6 +511,9 @@ return function (App $app) {
 			});
 		});
 
+		/*
+		 * /api/countries/*
+		 */
 		$group->group('/countries', function (RouteCollectorProxy $group) {
 			/**
 			 * Get all countries
@@ -497,11 +574,17 @@ return function (App $app) {
 			return resolveResponse($response, 400, ["message" => "Invalid email or password"]);
 		});
 
+		/*
+		 * Get all the categories
+		 */
 		$group->get('/categories', function (Request $request, Response $response, $args) {
 			$categoriesDAO = new CategoriesDAO();
 			return resolveResponse($response, 200, $categoriesDAO->getAll());
 		});
 
+		/*
+		 * Set a notification to 'read'
+		 */
 		$group->post('/notifications', function (Request $request, Response $response, $args) {
 			$notificationsDAO = new NotificationsDAO();
 			$param = json_decode(strval($request->getBody()), true);
@@ -513,6 +596,9 @@ return function (App $app) {
 			return resolveResponse($response, 200, ["message" => "done"]);
 		});
 
+		/*
+		 * Get all the notifications for a user
+		 */
 		$group->get('/notifications/{id}', function (Request $request, Response $response, $args) {
 			$notificationsDAO = new NotificationsDAO();
 			return resolveResponse($response, 200, ["notifications" => $notificationsDAO->getNotificationsByUserId($args['id'])]);

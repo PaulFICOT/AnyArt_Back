@@ -6,8 +6,16 @@ namespace App;
 
 use PDO;
 
+/**
+ * Class NotificationsDAO
+ * @package App
+ */
 class NotificationsDAO extends DbConnection {
-    public function getNotificationsByUserId($user_id): array {
+	/**
+	 * @param $user_id int a user's id
+	 * @return array an array of notifications
+	 */
+	public function getNotificationsByUserId($user_id): array {
         $sth = $this->database->prepare("
             SELECT
                 id_notification,
@@ -28,7 +36,11 @@ class NotificationsDAO extends DbConnection {
         return $sth->fetchAll(PDO::FETCH_ASSOC) ?: [];
     }
 
-    public function setReadNotificationById($notification_id): bool {
+	/**
+	 * @param $notification_id int a notification's id
+	 * @return bool true
+	 */
+	public function setReadNotificationById($notification_id): bool {
         $sth = $this->database->prepare("
             UPDATE notifications
             SET is_read = '1'

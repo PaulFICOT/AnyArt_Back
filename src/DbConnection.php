@@ -6,9 +6,19 @@ namespace App;
 
 use PDO;
 
+/**
+ * Class DbConnection
+ * @package App
+ */
 class DbConnection {
+	/**
+	 * @var PDO the database connection
+	 */
 	public $database;
 
+	/**
+	 * DbConnection constructor.
+	 */
 	public function __construct() {
 		$dbhost = $_ENV['DB_HOST'];
 		$dbuser = $_ENV['DB_USER'];

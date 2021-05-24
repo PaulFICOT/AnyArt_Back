@@ -6,7 +6,15 @@ namespace App;
 
 use PDO;
 
+/**
+ * Class PictureDAO
+ * @package App
+ */
 class PictureDAO extends DbConnection {
+	/**
+	 * @param $id int a picture id
+	 * @return string the url of the picture
+	 */
 	public function getUrlById($id): string {
 		$sth = $this->database->prepare("
 			SELECT picture.url
@@ -17,6 +25,11 @@ class PictureDAO extends DbConnection {
 
 		return $sth->fetch(PDO::FETCH_COLUMN) ?: '';
 	}
+
+	/**
+	 * @param $values array the pictures datas
+	 * @return string the id of the freshly inserted picture
+	 */
 	public function insertPicture($values): string {
 		$sth = $this->database->prepare("
 			INSERT INTO picture(url, is_thumbnail, thumb_of, user_id, post_id)
@@ -27,6 +40,10 @@ class PictureDAO extends DbConnection {
 		return $this->database->lastInsertId();
 	}
 
+	/**
+	 * @param $url string the new url for the picture
+	 * @param $user_id int the user's id
+	 */
 	public function updatePicture($url, $user_id) {
 		$sth = $this->database->prepare("
 			UPDATE
@@ -46,6 +63,10 @@ class PictureDAO extends DbConnection {
 		]);
 	}
 
+	/**
+	 * @param $user_id int the user's id
+	 * @return bool if the user have a profile picture
+	 */
 	public function hasProfilPicture($user_id): bool {
         $sth = $this->database->prepare("
             SELECT
