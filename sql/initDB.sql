@@ -209,7 +209,8 @@ CREATE TABLE picture
     PRIMARY KEY (picture_id),
     UNIQUE (url),
     FOREIGN KEY (user_id) REFERENCES users (user_id),
-    FOREIGN KEY (post_id) REFERENCES posts (post_id),
+    FOREIGN KEY (post_id) REFERENCES posts (post_id)
+        ON DELETE CASCADE,
     FOREIGN KEY (thumb_of) REFERENCES picture (picture_id)
         ON DELETE CASCADE
 )
