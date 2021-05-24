@@ -48,7 +48,7 @@ class PostsDAO extends DbConnection {
         $sth = $this->database->prepare("
         SELECT
              p.post_id
-            ,p2.url
+            ,p2.picture_id
             FROM users u
 
         INNER JOIN posts p ON (u.user_id = p.user_id)
@@ -56,7 +56,7 @@ class PostsDAO extends DbConnection {
         INNER JOIN posts_view pv ON (p.post_id = pv.post_id)
         INNER JOIN posts_category_list l on p.post_id = l.post_id
         INNER JOIN categories c3 on l.category_id = c3.category_id
-        INNER JOIN posts_tag t on p.post_id = t.post_id
+        LEFT JOIN posts_tag t on p.post_id = t.post_id
 
         GROUP BY p.post_id, u.username, p.title, p2.picture_id, p2.url
         ORDER BY (
@@ -71,7 +71,7 @@ class PostsDAO extends DbConnection {
             INNER JOIN posts p3 on u2.user_id = p3.user_id
             INNER JOIN posts_category_list pcl on p3.post_id = pcl.post_id
             INNER JOIN categories c on pcl.category_id = c.category_id
-            INNER JOIN posts_tag pt on p3.post_id = pt.post_id
+            LEFT JOIN posts_tag pt on p3.post_id = pt.post_id
             INNER JOIN countries c2 on u2.country_id = c2.country_id
             WHERE p.post_id = p3.post_id
         ) DESC
