@@ -14,15 +14,15 @@ class NotificationsDAO extends DbConnection {
                 content,
                 is_read,
                 crea_date,
-                user_id,
+                target_id,
                 follower_id,
                 post_id
             FROM notifications
-            WHERE user_id = :user_id
+            WHERE target_id = :target_id
         ");
 
 		$sth->execute([
-            ':user_id' => $user_id,
+            ':target_id' => $user_id,
         ]);
 
         return $sth->fetchAll(PDO::FETCH_ASSOC) ?: [];

@@ -8,7 +8,6 @@ use App\ImageHandler;
 use App\PictureDAO;
 use App\PostsDAO;
 use App\UsersDAO;
-use App\CategoriesDAO;
 use App\NotificationsDAO;
 use Lcobucci\JWT\Configuration;
 use Lcobucci\JWT\Signer\Hmac\Sha256;
