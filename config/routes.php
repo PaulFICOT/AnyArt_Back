@@ -337,6 +337,12 @@ return function (App $app) {
 								':user_id' => $body['user_id']
 							]);
 							break;
+						case 'switch':
+							$postsDAO->switchOpinion([
+								':post_id' => $args['id'],
+								':user_id' => $body['user_id']
+							]);
+							break;
 						default:
 							return resolveResponse($response, 400, ['message', 'Invalid action']);
 					}
