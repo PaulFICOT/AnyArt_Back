@@ -66,13 +66,13 @@ return function (App $app) {
 								['message' => "{$file->getClientFilename()}'s size is to big"]
 							);
 							break;
-							default:
-								return resolveResponse(
-									$response,
-									400,
-									['message' => "Unknown error on {$file->getClientFilename()}"]
-								);
-								break;
+						default:
+							return resolveResponse(
+								$response,
+								400,
+								['message' => "Unknown error on {$file->getClientFilename()}"]
+							);
+							break;
 					}
 				}
 				if (!$image_handler->checkIntegrity($file)) {
@@ -86,8 +86,8 @@ return function (App $app) {
 
 			$pictureDAO = new PictureDAO();
 			foreach ($files as $key => $file) {
-				['original' => $original, 'thumbnail' => $thumbnail] = $image_handler->processFile($file, true);
 				if (!empty($body['post_id'])) {
+					['original' => $original, 'thumbnail' => $thumbnail] = $image_handler->processFile($file, true);
 					$originalId = $pictureDAO->insertPicture([
 						':url' => $original,
 						':is_thumbnail' => 0,
@@ -103,6 +103,7 @@ return function (App $app) {
 						':post_id' => $body['post_id'],
 					]);
 				} else {
+					['original' => $original] = $image_handler->processFile($file, false);
 					if ($pictureDAO->hasProfilPicture($body['user_id'])) {
 						$pictureDAO->updatePicture($original, $body['user_id']);
 					} else {
@@ -185,58 +186,6 @@ return function (App $app) {
 					$filters = (!empty($_GET['filters']) ? explode(',', $_GET['filters']) : []);
 					return resolveResponse($response, 200, $postsDAO->getThumbnailsDiscover($args['id'], $filters));
 				});
-			});
-
-			$group->get('/categories', function (Request $request, Response $response, $args) {
-				$postsDAO = new PostsDAO();
-				$categories = $postsDAO->getCategoriesByPostId($args['id']);
-
-				if (empty($categories)) {
-					return resolveResponse($response, 500, ["message" => "The post with this id (" . $args["id"] . ") is not found."]);
-				}
-
-				return resolveResponse($response, 200, $categories);
-			});
-
-			$group->get('/tags', function (Request $request, Response $response, $args) {
-				$postsDAO = new PostsDAO();
-				$tags = $postsDAO->getTagsByPostId($args['id']);
-
-				return resolveResponse($response, 200, $tags);
-			});
-
-			$group->get('/comments', function (Request $request, Response $response, $args) {
-				$postsDAO = new PostsDAO();
-				$comments = $postsDAO->getCommentByPostId($args['id']);
-
-				return resolveResponse($response, 200, $comments);
-			});
-
-			$group->post('/comments', function (Request $request, Response $response, $args) {
-				$postsDAO = new PostsDAO();
-
-				$body = json_decode($request->getBody()->getContents(), true);
-
-				$postsDAO->newComment([
-					':content' => $body['content'],
-					':crea_date' => $body['crea_date'],
-					':reply_to' => $body['reply_to'],
-					':user_id' => $body['user_id'],
-					':post_id' => $args['id']
-				]);
-
-				return resolveResponse($response, 200, ["message" => 'Comment successfully added']);
-			});
-
-			$group->get('/opinion', function (Request $request, Response $response, $args) {
-				$postsDAO = new PostsDAO();
-				$postsDAO = new PostsDAO();
-				$opinions = $postsDAO->getOpinion($args['id']);
-
-				return resolveResponse($response, 200, [
-					'likes' => $opinions[1] ?? 0,
-					'dislikes' => $opinions[0] ?? 0
-				]);
 			});
 
 			/**
