@@ -69,15 +69,17 @@ return function (App $app) {
 			foreach ($files as $file) {
 				['original' => $original, 'thumbnail' => $thumbnail] = $image_handler->processFile($file, true);
 				if (!empty($body['post_id'])) {
-					$pictureDAO->insertPicture([
+					$originalId = $pictureDAO->insertPicture([
 						':url' => $original,
 						':is_thumbnail' => 0,
+						':thumb_of' => null,
 						':user_id' => $body['user_id'],
 						':post_id' => $body['post_id'],
 					]);
 					$pictureDAO->insertPicture([
 						':url' => $thumbnail,
-						':is_thumbnail' => 0,
+						':is_thumbnail' => 1,
+						':thumb_of' => $originalId,
 						':user_id' => $body['user_id'],
 						':post_id' => $body['post_id'],
 					]);
@@ -185,19 +187,6 @@ return function (App $app) {
 				$tags = $postsDAO->getTagsByPostId($args['id']);
 
 				return resolveResponse($response, 200, $tags);
-			});
-
-			$group->get('/pictures', function (Request $request, Response $response, $args) {
-				$postsDAO = new PostsDAO();
-				$pictures = $postsDAO->getPicturesByPostId($args['id']);
-
-				var_dump($pictures);
-
-				if (empty($pictures)) {
-					return resolveResponse($response, 500, ["message" => "The post with this id (" . $args["id"] . ") is not found."]);
-				}
-
-				return resolveResponse($response, 200, $pictures);
 			});
 
 			$group->get('/comments', function (Request $request, Response $response, $args) {

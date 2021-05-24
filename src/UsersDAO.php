@@ -61,7 +61,9 @@ class UsersDAO extends DbConnection {
                 job_function,
                 open_to_work,
                 country_id,
-                donation_link
+                donation_link,
+                (SELECT picture.picture_id FROM picture
+                WHERE picture.user_id = users.user_id AND picture.post_id IS NULL AND picture.thumb_of IS NULL) profile_pic
             FROM users
             WHERE user_id = :id");
 		$sth->execute(array(':id' => $id));
@@ -86,7 +88,9 @@ class UsersDAO extends DbConnection {
                 job_function,
                 open_to_work,
                 country_id,
-                donation_link
+                donation_link,
+                (SELECT picture.picture_id FROM picture
+                WHERE picture.user_id = users.user_id AND picture.post_id IS NULL AND picture.thumb_of IS NULL) profile_pic
             FROM users
             WHERE mail = :email");
 		$sth->execute(array(':email' => $email));
@@ -107,7 +111,7 @@ class UsersDAO extends DbConnection {
             ,users1.open_to_work
             ,users1.mail
             ,users1.donation_link
-            ,(SELECT picture.url FROM picture
+            ,(SELECT picture.picture_id FROM picture
                 WHERE picture.user_id = users1.user_id AND picture.post_id IS NULL AND picture.thumb_of IS NULL) profile_pic
             ,(SELECT COUNT(followed_user_id) FROM users_follower AS users_follower2
                 WHERE users_follower2.followed_user_id = users1.user_id) AS 'Followers'
