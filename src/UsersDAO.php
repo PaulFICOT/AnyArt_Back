@@ -8,8 +8,15 @@ use PDO;
 use DateTime;
 use DateTimeZone;
 
+/**
+ * Class UsersDAO
+ * @package App
+ */
 class UsersDAO extends DbConnection {
-    public function getUsers(): array {
+	/**
+	 * @return array all the users
+	 */
+	public function getUsers(): array {
         $sth = $this->database->prepare("
             SELECT
                 user_id,
@@ -33,7 +40,11 @@ class UsersDAO extends DbConnection {
         return $sth->fetchAll(PDO::FETCH_ASSOC) ?: [];
     }
 
-    public function getUsersPasswordById($id): array {
+	/**
+	 * @param $id int a user id
+	 * @return array the user password
+	 */
+	public function getUsersPasswordById($id): array {
         $sth = $this->database->prepare("
             SELECT
                 password
@@ -44,7 +55,11 @@ class UsersDAO extends DbConnection {
         return $sth->fetch(PDO::FETCH_ASSOC) ?: [];
     }
 
-    public function getUsersById($id): array {
+	/**
+	 * @param $id int the user id
+	 * @return array the user data
+	 */
+	public function getUsersById($id): array {
         $sth = $this->database->prepare("
             SELECT
                 user_id,
@@ -73,7 +88,11 @@ class UsersDAO extends DbConnection {
         return $sth->fetch(PDO::FETCH_ASSOC) ?: [];
     }
 
-    public function getUsersByEmail($email): array {
+	/**
+	 * @param $email string the user email
+	 * @return array the user data
+	 */
+	public function getUsersByEmail($email): array {
         $sth = $this->database->prepare("
             SELECT
                 user_id,
@@ -102,7 +121,11 @@ class UsersDAO extends DbConnection {
         return $sth->fetch(PDO::FETCH_ASSOC) ?: [];
     }
 
-    public function getUserProfileByUserId($user_id): array {
+	/**
+	 * @param $user_id int the user id
+	 * @return array the user data
+	 */
+	public function getUserProfileByUserId($user_id): array {
         $sth = $this->database->prepare("
         SELECT
             users1.user_id
@@ -136,7 +159,12 @@ class UsersDAO extends DbConnection {
         return $sth->fetch(PDO::FETCH_ASSOC) ?: [];
     }
 
-    public function setToken($id, $token): bool {
+	/**
+	 * @param $id int the user id
+	 * @param $token string the token to set
+	 * @return bool true
+	 */
+	public function setToken($id, $token): bool {
         $sth = $this->database->prepare("UPDATE users SET token = :token WHERE user_id = :id");
 		$sth->execute([
             ':token' => $token,
@@ -146,7 +174,12 @@ class UsersDAO extends DbConnection {
         return true;
     }
 
-    public function verifToken($id, $token): bool {
+	/**
+	 * @param $id int the user id
+	 * @param $token string the token to check
+	 * @return bool true if the token match
+	 */
+	public function verifToken($id, $token): bool {
         $sth = $this->database->prepare("SELECT 1 FROM users WHERE user_id = :id AND token = :token LIMIT 1");
         $sth->execute([
             ':id' => $id,
@@ -156,7 +189,12 @@ class UsersDAO extends DbConnection {
         return $sth->rowCount() == 1;
     }
 
-    public function addFollower($follower, $followed): bool {
+	/**
+	 * @param $follower int the follower user id
+	 * @param $followed int the followed user id
+	 * @return bool true
+	 */
+	public function addFollower($follower, $followed): bool {
         $date = new DateTime("now", new DateTimeZone('Europe/Paris'));
         $sth = $this->database->prepare("
             INSERT INTO
@@ -177,7 +215,12 @@ class UsersDAO extends DbConnection {
         return true;
     }
 
-    public function removeFollower($follower, $followed): bool {
+	/**
+	 * @param $follower int the follower user id
+	 * @param $followed int the followed user id
+	 * @return bool true
+	 */
+	public function removeFollower($follower, $followed): bool {
         $sth = $this->database->prepare("
             DELETE FROM users_follower
             WHERE follower_user_id = :follower AND followed_user_id = :followed
@@ -192,7 +235,12 @@ class UsersDAO extends DbConnection {
     }
 
 
-    public function isFollowing($follower, $followed): bool {
+	/**
+	 * @param $follower int the follower user id
+	 * @param $followed int the followed user id
+	 * @return bool true if the user is following
+	 */
+	public function isFollowing($follower, $followed): bool {
         $sth = $this->database->prepare("
             SELECT
                 COUNT(follower_id) AS 'is_followed'
@@ -210,7 +258,12 @@ class UsersDAO extends DbConnection {
         return $sth->fetch(PDO::FETCH_ASSOC)['is_followed'] >= 1;
     }
 
-    public function modifyUserPassword($user_id, $password): bool {
+	/**
+	 * @param $user_id int the user id
+	 * @param $password string the new password
+	 * @return bool true
+	 */
+	public function modifyUserPassword($user_id, $password): bool {
         $password_hash = password_hash($password, PASSWORD_DEFAULT);
         $sth = $this->database->prepare("UPDATE users SET
             `password` = :pwd
@@ -225,7 +278,12 @@ class UsersDAO extends DbConnection {
         return true;
     }
 
-    public function modifyUser($user_id, $data): bool {
+	/**
+	 * @param $user_id int the user id
+	 * @param $data array the user data
+	 * @return bool true
+	 */
+	public function modifyUser($user_id, $data): bool {
         $date = new DateTime("now", new DateTimeZone('Europe/Paris'));
         $sth = $this->database->prepare("UPDATE users SET
             lastname = :lastname,
@@ -256,7 +314,11 @@ class UsersDAO extends DbConnection {
         return true;
     }
 
-    public function createUser($data): bool {
+	/**
+	 * @param $data array the user data
+	 * @return bool true
+	 */
+	public function createUser($data): bool {
         $pwd = password_hash($data['password'], PASSWORD_DEFAULT);
         $date = new DateTime("now", new DateTimeZone('Europe/Paris'));
 

@@ -6,8 +6,16 @@ namespace App;
 
 use PDO;
 
+/**
+ * Class PostsDAO
+ * @package App
+ */
 class PostsDAO extends DbConnection {
 
+	/**
+	 * @param $values array an array containing the post and the user id
+	 * @return array the post datas
+	 */
 	public function getPostAndUserByPostId($values): array {
 		$sth = $this->database->prepare("
 			SELECT
@@ -44,6 +52,10 @@ class PostsDAO extends DbConnection {
 		return $sth->fetch(PDO::FETCH_ASSOC) ?: [];
 	}
 
+	/**
+	 * @param $keywords string the keywords of the search query
+	 * @return array the posts id and their thumbnail
+	 */
 	public function getThumbnailsResearch($keywords): array {
         $sth = $this->database->prepare("
         SELECT
@@ -83,6 +95,10 @@ class PostsDAO extends DbConnection {
 		return $sth->fetchAll(PDO::FETCH_ASSOC) ?: [];
     }
 
+	/**
+	 * @param $filters
+	 * @return array
+	 */
 	public function getThumbnailsUnlogged($filters): array {
 		$in  = (!empty($filters) ? str_repeat('?,', count($filters) - 1) . '?' : '');
 		$sth = $this->database->prepare("
@@ -106,7 +122,11 @@ class PostsDAO extends DbConnection {
 		return $sth->fetchAll(PDO::FETCH_ASSOC) ?: [];
 	}
 
-    public function getThumbnailsByUserId($user_id): array {
+	/**
+	 * @param $user_id int a user's id
+	 * @return array the thumbnails of a user
+	 */
+	public function getThumbnailsByUserId($user_id): array {
 		$sth = $this->database->prepare("
             SELECT
                 posts.post_id,
@@ -122,7 +142,12 @@ class PostsDAO extends DbConnection {
 		return $sth->fetchAll(PDO::FETCH_ASSOC) ?: [];
 	}
 
-    public function getThumbnailsDiscover($id, $filters): array {
+	/**
+	 * @param $id int a user id
+	 * @param  array the filters
+	 * @return array the thumbnails
+	 */
+	public function getThumbnailsDiscover($id, $filters): array {
 		$in  = (!empty($filters) ? str_repeat('?,', count($filters) - 1) . '?' : '');
         $sth = $this->database->prepare("
         SELECT
@@ -181,6 +206,10 @@ class PostsDAO extends DbConnection {
 		return $sth->fetchAll(PDO::FETCH_ASSOC) ?: [];
     }
 
+	/**
+	 * @param $filters array the filters
+	 * @return array the thumbnails
+	 */
 	public function getThumbnailsNewPosts($filters): array {
 		$in  = (!empty($filters) ? str_repeat('?,', count($filters) - 1) . '?' : '');
         $sth = $this->database->prepare("
@@ -205,7 +234,11 @@ class PostsDAO extends DbConnection {
         return $sth->fetchAll(PDO::FETCH_ASSOC) ?: [];
     }
 
-    public function getThumbnailsHottests($filters): array {
+	/**
+	 * @param $filters array the filters
+	 * @return array the thumbnails
+	 */
+	public function getThumbnailsHottests($filters): array {
 		$in  = (!empty($filters) ? str_repeat('?,', count($filters) - 1) . '?' : '');
         $sth = $this->database->prepare("
         SELECT
@@ -229,7 +262,11 @@ class PostsDAO extends DbConnection {
         return $sth->fetchAll(PDO::FETCH_ASSOC) ?: [];
     }
 
-    public function getThumbnailsRaising($filters): array {
+	/**
+	 * @param $filters array the filters
+	 * @return array the thumbnail
+	 */
+	public function getThumbnailsRaising($filters): array {
 		$in  = (!empty($filters) ? str_repeat('?,', count($filters) - 1) . '?' : '');
         $sth = $this->database->prepare("
         SELECT
@@ -253,6 +290,10 @@ class PostsDAO extends DbConnection {
         return $sth->fetchAll(PDO::FETCH_ASSOC) ?: [];
     }
 
+	/**
+	 * @param $id int the post id
+	 * @return array the category of the post
+	 */
 	public function getCategoriesByPostId($id): array {
 		$sth = $this->database->prepare("
 			SELECT
@@ -273,6 +314,10 @@ class PostsDAO extends DbConnection {
 		return $sth->fetch(PDO::FETCH_ASSOC) ?: [];
 	}
 
+	/**
+	 * @param $id int the post id
+	 * @return array the post tags
+	 */
 	public function getTagsByPostId($id): array {
 		$sth = $this->database->prepare("
 			SELECT
@@ -292,6 +337,10 @@ class PostsDAO extends DbConnection {
 		return $sth->fetchAll(PDO::FETCH_ASSOC) ?: [];
 	}
 
+	/**
+	 * @param $id int the post id
+	 * @return array the pictures
+	 */
 	public function getPicturesByPostId($id): array {
 		$sth = $this->database->prepare("
 			SELECT
@@ -308,6 +357,10 @@ class PostsDAO extends DbConnection {
 		return $sth->fetchAll(PDO::FETCH_ASSOC) ?: [];
 	}
 
+	/**
+	 * @param $id int the post id
+	 * @return array the comments of the post
+	 */
 	public function getCommentByPostId($id): array {
 		$sth = $this->database->prepare("
 			SELECT
@@ -335,6 +388,10 @@ class PostsDAO extends DbConnection {
 		return $sth->fetchAll(PDO::FETCH_ASSOC) ?: [];
 	}
 
+	/**
+	 * @param $values array the comment datas
+	 * @return bool true
+	 */
 	public function newComment($values): bool {
 		$sth = $this->database->prepare("
 			INSERT INTO posts_comment (content, crea_date, reply_to, user_id, post_id)
@@ -346,6 +403,9 @@ class PostsDAO extends DbConnection {
 		return true;
 	}
 
+	/**
+	 * @param $values array the post id and the user id
+	 */
 	public function rmOpinion($values) {
 		$sth = $this->database->prepare("
 			DELETE FROM posts_like
@@ -356,6 +416,9 @@ class PostsDAO extends DbConnection {
 		$sth->execute($values);
 	}
 
+	/**
+	 * @param $post_id int add a view to a post
+	 */
 	public function view($post_id) {
 		$sth = $this->database->prepare("
 			UPDATE posts_view pv
@@ -366,6 +429,9 @@ class PostsDAO extends DbConnection {
 		$sth->execute([':post_id' => $post_id]);
 	}
 
+	/**
+	 * @param $values array the post_like data
+	 */
 	public function setOpinion($values) {
 		$sth = $this->database->prepare("
 			INSERT INTO posts_like(is_like, crea_date, user_id, post_id)
@@ -375,6 +441,10 @@ class PostsDAO extends DbConnection {
 		$sth->execute($values);
 	}
 
+	/**
+	 * @param $post_id int the post id
+	 * @return array the number of likes and dislikes
+	 */
 	public function getOpinion($post_id) {
 		$sth = $this->database->prepare("
 			SELECT is_like, COUNT(*)
@@ -388,6 +458,9 @@ class PostsDAO extends DbConnection {
 		return $sth->fetchAll(PDO::FETCH_KEY_PAIR) ?: [];
 	}
 
+	/**
+	 * @param $values array the post id and the user id
+	 */
 	public function switchOpinion($values) {
 		$sth = $this->database->prepare("
 			UPDATE posts_like
@@ -399,6 +472,10 @@ class PostsDAO extends DbConnection {
 		$sth->execute($values);
 	}
 
+	/**
+	 * @param $values array the post data
+	 * @return string the freshly inserted post id
+	 */
 	public function createPost($values) {
 		$sth = $this->database->prepare("
 			INSERT INTO posts(title, content, crea_date, upd_date, user_id)
@@ -410,6 +487,9 @@ class PostsDAO extends DbConnection {
 		return $this->database->lastInsertId();
 	}
 
+	/**
+	 * @param $post_id int the post id
+	 */
 	public function initView($post_id) {
 		$sth = $this->database->prepare("
 			INSERT INTO posts_view(view_count, post_id)
@@ -419,6 +499,9 @@ class PostsDAO extends DbConnection {
 		$sth->execute([':post_id' => $post_id]);
 	}
 
+	/**
+	 * @param $values array the category data
+	 */
 	public function setCategory($values) {
 		$sth = $this->database->prepare("
 			INSERT INTO posts_category_list(post_id, category_id)
@@ -428,6 +511,9 @@ class PostsDAO extends DbConnection {
 		$sth->execute($values);
 	}
 
+	/**
+	 * @param $values array the tag data
+	 */
 	public function setTag($values) {
 		$sth = $this->database->prepare("
 			INSERT INTO posts_tag(tag, post_id)
@@ -437,6 +523,9 @@ class PostsDAO extends DbConnection {
 		$sth->execute($values);
 	}
 
+	/**
+	 * @param $post_id int the post id
+	 */
 	public function rmPost($post_id) {
 		$sth = $this->database->prepare("
 			DELETE FROM posts

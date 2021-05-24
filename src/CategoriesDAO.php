@@ -6,8 +6,15 @@ namespace App;
 
 use PDO;
 
+/**
+ * Class CategoriesDAO
+ * @package App
+ */
 class CategoriesDAO extends DbConnection {
 
+	/**
+	 * @return array all the categories
+	 */
 	public function getAll() {
 		$sth = $this->database->prepare("
 		SELECT
