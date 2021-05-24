@@ -86,8 +86,8 @@ return function (App $app) {
 
 			$pictureDAO = new PictureDAO();
 			foreach ($files as $key => $file) {
-				['original' => $original, 'thumbnail' => $thumbnail] = $image_handler->processFile($file, true);
 				if (!empty($body['post_id'])) {
+					['original' => $original, 'thumbnail' => $thumbnail] = $image_handler->processFile($file, true);
 					$originalId = $pictureDAO->insertPicture([
 						':url' => $original,
 						':is_thumbnail' => 0,
@@ -103,6 +103,7 @@ return function (App $app) {
 						':post_id' => $body['post_id'],
 					]);
 				} else {
+					['original' => $original] = $image_handler->processFile($file, false);
 					if ($pictureDAO->hasProfilPicture($body['user_id'])) {
 						$pictureDAO->updatePicture($original, $body['user_id']);
 					} else {
