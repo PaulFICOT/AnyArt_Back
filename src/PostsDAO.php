@@ -308,7 +308,7 @@ class PostsDAO extends DbConnection {
 			FROM posts
 
 			INNER JOIN posts_comment ON (posts.post_id = posts_comment.post_id)
-			INNER JOIN users ON (posts.user_id = users.user_id)
+			INNER JOIN users ON (posts_comment.user_id = users.user_id)
 
 			WHERE posts.post_id = :id
 
@@ -420,5 +420,14 @@ class PostsDAO extends DbConnection {
 		");
 
 		$sth->execute($values);
+	}
+
+	public function rmPost($post_id) {
+		$sth = $this->database->prepare("
+			DELETE FROM posts
+			WHERE post_id = :post_id
+		");
+
+		$sth->execute([':post_id' => $post_id]);
 	}
 }
