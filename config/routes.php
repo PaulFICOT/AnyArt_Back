@@ -90,6 +90,7 @@ return function (App $app) {
 						$pictureDAO->insertPicture([
 							':url' => $original,
 							':is_thumbnail' => 0,
+							':thumb_of' => null,
 							':user_id' => $body['user_id'],
 							':post_id' => NULL,
 						]);
