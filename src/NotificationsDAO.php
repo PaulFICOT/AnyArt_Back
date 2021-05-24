@@ -37,7 +37,7 @@ class NotificationsDAO extends DbConnection {
     }
 
 	/**
-	 * @param $notification_id a notification's id
+	 * @param $notification_id int a notification's id
 	 * @return bool true
 	 */
 	public function setReadNotificationById($notification_id): bool {
