@@ -210,6 +210,13 @@ return function (App $app) {
 					return resolveResponse($response, 200, $post);
 				});
 
+				$group->delete('', function (Request $request, Response $response, $args) {
+					$postsDAO = new PostsDAO();
+					$postsDAO->rmPost($args['id']);
+
+					return resolveResponse($response, 200, ['message' => 'Post successfully deleted']);
+				});
+
 				$group->get('/categories', function (Request $request, Response $response, $args) {
 					$postsDAO = new PostsDAO();
 					$categories = $postsDAO->getCategoriesByPostId($args['id']);
