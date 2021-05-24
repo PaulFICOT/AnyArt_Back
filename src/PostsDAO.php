@@ -359,6 +359,17 @@ class PostsDAO extends DbConnection {
 		return $sth->fetchAll(PDO::FETCH_KEY_PAIR) ?: [];
 	}
 
+	public function switchOpinion($values) {
+		$sth = $this->database->prepare("
+			UPDATE posts_like
+			SET is_like = NOT is_like
+			WHERE post_id = :post_id
+			  AND user_id = :user_id
+		");
+
+		$sth->execute($values);
+	}
+
 	public function createPost($values) {
 		$sth = $this->database->prepare("
 			INSERT INTO posts(title, content, crea_date, upd_date, user_id)
