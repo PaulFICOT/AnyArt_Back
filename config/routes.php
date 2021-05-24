@@ -183,7 +183,7 @@ return function (App $app) {
 				$group->get('/{id}/discover', function (Request $request, Response $response, $args) {
 					$postsDAO = new PostsDAO();
 					$filters = (!empty($_GET['filters']) ? explode(',', $_GET['filters']) : []);
-					return resolveResponse($response, 200, $postsDAO->getThumbnailsDiscover($args['id']));
+					return resolveResponse($response, 200, $postsDAO->getThumbnailsDiscover($args['id'], $filters));
 				});
 			});
 
