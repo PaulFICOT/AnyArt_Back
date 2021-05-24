@@ -7,7 +7,7 @@ namespace App;
 use PDO;
 
 class DbConnection {
-	public PDO $database;
+	public $database;
 
 	public function __construct() {
 		$dbhost = $_ENV['DB_HOST'];

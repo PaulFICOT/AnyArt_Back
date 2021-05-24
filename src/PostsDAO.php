@@ -10,33 +10,33 @@ class PostsDAO extends DbConnection {
 
 	public function getPostAndUserByPostId($values): array {
 		$sth = $this->database->prepare("
-SELECT
-				 posts.post_id
-				,posts.title
-				,posts.user_id
-				,users.username
-				,users.is_verified
-				,users.job_function
-				,users.open_to_work
-				,picture.picture_id
-				,picture.url
-				,posts.content
-				,views.view_count
-                ,:user_id
-				,(SELECT COUNT(like_id) FROM posts_like isliked
-				WHERE isliked.user_id = :user_id AND isliked.post_id = posts.post_id AND isliked.is_like = TRUE) AS 'isLiked'
-				,(SELECT COUNT(like_id) FROM posts_like isdisliked
-				WHERE isdisliked.user_id = :user_id AND isdisliked.post_id = posts.post_id AND isdisliked.is_like = FALSE) AS 'isDisliked'
-				,(SELECT COUNT(like_id) FROM posts_like likes
-					WHERE likes.post_id = posts.post_id AND likes.is_like = TRUE) AS 'likes'
-				,(SELECT COUNT(like_id) FROM posts_like dislikes
-					WHERE dislikes.post_id = posts.post_id AND dislikes.is_like = FALSE) AS 'dislikes'
+			SELECT
+			 posts.post_id
+			,posts.title
+			,posts.user_id
+			,users.username
+			,users.is_verified
+			,users.job_function
+			,users.open_to_work
+			,(SELECT picture.picture_id FROM picture
+				WHERE picture.user_id = users.user_id AND picture.post_id IS NULL) 'picture_id'
+			,(SELECT picture.url FROM picture
+				WHERE picture.user_id = users.user_id AND picture.post_id IS NULL) 'url'
+			,posts.content
+			,views.view_count
+			,(SELECT COUNT(like_id) FROM posts_like isliked
+			WHERE isliked.user_id = :user_id AND isliked.post_id = posts.post_id AND isliked.is_like = TRUE) AS 'isLiked'
+			,(SELECT COUNT(like_id) FROM posts_like isdisliked
+			WHERE isdisliked.user_id = :user_id AND isdisliked.post_id = posts.post_id AND isdisliked.is_like = FALSE) AS 'isDisliked'
+			,(SELECT COUNT(like_id) FROM posts_like likes
+				WHERE likes.post_id = posts.post_id AND likes.is_like = TRUE) AS 'likes'
+			,(SELECT COUNT(like_id) FROM posts_like dislikes
+				WHERE dislikes.post_id = posts.post_id AND dislikes.is_like = FALSE) AS 'dislikes'
 
 			FROM posts
 
 			INNER JOIN users ON (posts.user_id = users.user_id)
 			INNER JOIN posts_view views ON (posts.post_id = views.post_id)
-			INNER JOIN picture ON (users.user_id = picture.user_id AND picture.post_id IS NULL)
 
 			WHERE posts.post_id = :post_id
     	");
@@ -62,7 +62,7 @@ SELECT
         INNER JOIN categories c3 on l.category_id = c3.category_id
         INNER JOIN posts_tag t on p.post_id = t.post_id
 
-        WHERE u.user_id <> :user AND pv.view_count < :maxView
+        WHERE pv.view_count < :maxView
         GROUP BY p.post_id, u.username, p.title, p2.picture_id, p2.url
         ORDER BY (
             SELECT
@@ -92,8 +92,8 @@ SELECT
 	public function getThumbnailsUnlogged(): array {
 		$sth = $this->database->prepare("
             SELECT
-                 posts.post_id
-                ,pictures.url
+        		posts.post_id,
+                pictures.picture_id
             FROM posts
 
             INNER JOIN picture AS pictures ON (posts.post_id = pictures.post_id)
@@ -103,6 +103,22 @@ SELECT
 			#ORDER BY RAND()
         ");
 		$sth->execute();
+
+		return $sth->fetchAll(PDO::FETCH_ASSOC) ?: [];
+	}
+
+    public function getThumbnailsByUserId($user_id): array {
+		$sth = $this->database->prepare("
+            SELECT
+                posts.post_id,
+                pictures.url
+            FROM posts
+
+            INNER JOIN picture AS pictures ON (posts.post_id = pictures.post_id)
+
+            WHERE pictures.is_thumbnail = '1' AND posts.user_id = :user_id
+        ");
+		$sth->execute([':user_id' => $user_id]);
 
 		return $sth->fetchAll(PDO::FETCH_ASSOC) ?: [];
 	}
@@ -121,7 +137,7 @@ SELECT
         WHERE u.user_id = :user
         GROUP BY u.username");
         $sth->execute(array(':user' => $id));
-        $keywords = $sth->fetchColumn(0) ?: [];
+        $keywords = $sth->fetchColumn(0) ?: "";
 
         $sth = $this->database->prepare("
         SELECT
@@ -168,7 +184,7 @@ SELECT
         $sth = $this->database->prepare("
         SELECT
              posts.post_id
-            ,pictures.url
+            ,pictures.picture_id
         FROM posts
              INNER JOIN picture AS pictures ON (posts.post_id = pictures.post_id)
 
@@ -187,7 +203,7 @@ SELECT
         $sth = $this->database->prepare("
         SELECT
             posts.post_id,
-            pictures.url
+            pictures.picture_id
         FROM posts
             INNER JOIN picture AS pictures ON (posts.post_id = pictures.post_id)
 
@@ -208,7 +224,7 @@ SELECT
         $sth = $this->database->prepare("
         SELECT
             posts.post_id,
-            pictures.url
+            pictures.picture_id
         FROM posts
         INNER JOIN picture AS pictures ON (posts.post_id = pictures.post_id)
         INNER JOIN posts_view pv on posts.post_id = pv.post_id
@@ -266,14 +282,12 @@ SELECT
 	public function getPicturesByPostId($id): array {
 		$sth = $this->database->prepare("
 			SELECT
-				 posts.post_id,
-				 pictures.picture_id,
-				 pictures.url
-			FROM posts
+				picture.picture_id,
+			   	picture.thumb_of
+			FROM picture
 
-			INNER JOIN picture AS pictures ON (posts.post_id = pictures.post_id)
-
-			WHERE posts.post_id = :id
+			WHERE picture.post_id = :id
+			AND thumb_of IS NOT NULL
 		");
 
 		$sth->execute(array(':id' => $id));
@@ -290,7 +304,6 @@ SELECT
 				,posts_comment.user_id
 				,users.username
 				,picture.picture_id
-				,picture.url
 				,posts_comment.reply_to
 				,posts_comment.content
 			FROM posts
@@ -360,5 +373,54 @@ SELECT
 		$sth->execute([':post_id' => $post_id]);
 
 		return $sth->fetchAll(PDO::FETCH_KEY_PAIR) ?: [];
+	}
+
+	public function switchOpinion($values) {
+		$sth = $this->database->prepare("
+			UPDATE posts_like
+			SET is_like = NOT is_like
+			WHERE post_id = :post_id
+			  AND user_id = :user_id
+		");
+
+		$sth->execute($values);
+	}
+
+	public function createPost($values) {
+		$sth = $this->database->prepare("
+			INSERT INTO posts(title, content, crea_date, upd_date, user_id)
+			VALUE (:title, :desc, :crea_date, :upt_date, :user_id);
+		");
+
+		$sth->execute($values);
+
+		return $this->database->lastInsertId();
+	}
+
+	public function initView($post_id) {
+		$sth = $this->database->prepare("
+			INSERT INTO posts_view(view_count, post_id)
+			VALUE (0, :post_id);
+		");
+
+		$sth->execute([':post_id' => $post_id]);
+	}
+
+	public function setCategory($values) {
+		$sth = $this->database->prepare("
+			INSERT INTO posts_category_list(post_id, category_id)
+			VALUE (:post_id, :category_id);
+		");
+
+		$sth->execute($values);
+	}
+
+	public function setTag($values) {
+		$sth = $this->database->prepare("
+			INSERT INTO posts_tag(tag, post_id)
+			VALUE (:tag, :post_id);
+		");
+
+		$sth->execute($values);
 	}
 }

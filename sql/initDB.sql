@@ -155,15 +155,18 @@ ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 CREATE TABLE notifications(
    id_notification INT NOT NULL AUTO_INCREMENT,
-   text VARCHAR(255) NOT NULL,
+   content VARCHAR(255) NOT NULL,
    is_read BOOLEAN NOT NULL,
    crea_date DATETIME NOT NULL,
-   user_id INT NOT NULL,
-   post_id INT NOT NULL,
+   target_id INT NOT NULL,
+   follower_id INT,
+   post_id INT,
    PRIMARY KEY(id_notification),
    FOREIGN KEY(post_id) REFERENCES posts(post_id)
    ON DELETE CASCADE,
-   FOREIGN KEY(user_id) REFERENCES users(user_id)
+   FOREIGN KEY(target_id) REFERENCES users(user_id),
+   FOREIGN KEY(follower_id) REFERENCES users_follower(follower_id)
+   ON DELETE CASCADE
 
 )
 ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
@@ -172,12 +175,14 @@ CREATE TABLE picture(
    picture_id INT NOT NULL AUTO_INCREMENT,
    url VARCHAR(255) NOT NULL,
    is_thumbnail BOOLEAN NOT NULL,
+   thumb_of INT,
    user_id INT NOT NULL,
    post_id INT,
    PRIMARY KEY(picture_id),
    UNIQUE(url),
    FOREIGN KEY(user_id) REFERENCES users(user_id),
-   FOREIGN KEY(post_id) REFERENCES posts(post_id)
+   FOREIGN KEY(post_id) REFERENCES posts(post_id),
+   FOREIGN KEY(thumb_of) REFERENCES picture(picture_id)
    ON DELETE CASCADE
 )
 ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
