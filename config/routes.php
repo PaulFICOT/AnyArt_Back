@@ -66,13 +66,13 @@ return function (App $app) {
 								['message' => "{$file->getClientFilename()}'s size is to big"]
 							);
 							break;
-							default:
-								return resolveResponse(
-									$response,
-									400,
-									['message' => "Unknown error on {$file->getClientFilename()}"]
-								);
-								break;
+						default:
+							return resolveResponse(
+								$response,
+								400,
+								['message' => "Unknown error on {$file->getClientFilename()}"]
+							);
+							break;
 					}
 				}
 				if (!$image_handler->checkIntegrity($file)) {
