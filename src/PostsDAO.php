@@ -10,7 +10,7 @@ class PostsDAO extends DbConnection {
 
 	public function getPostAndUserByPostId($values): array {
 		$sth = $this->database->prepare("
-SELECT
+			SELECT
 				 posts.post_id
 				,posts.title
 				,posts.user_id
@@ -19,7 +19,6 @@ SELECT
 				,users.job_function
 				,users.open_to_work
 				,picture.picture_id
-				,picture.url
 				,posts.content
 				,views.view_count
                 ,:user_id
@@ -62,7 +61,7 @@ SELECT
         INNER JOIN categories c3 on l.category_id = c3.category_id
         INNER JOIN posts_tag t on p.post_id = t.post_id
 
-        WHERE u.user_id <> :user AND pv.view_count < :maxView
+        WHERE pv.view_count < :maxView
         GROUP BY p.post_id, u.username, p.title, p2.picture_id, p2.url
         ORDER BY (
             SELECT
@@ -92,8 +91,8 @@ SELECT
 	public function getThumbnailsUnlogged(): array {
 		$sth = $this->database->prepare("
             SELECT
-                 posts.post_id
-                ,pictures.url
+        		posts.post_id,
+                pictures.picture_id
             FROM posts
 
             INNER JOIN picture AS pictures ON (posts.post_id = pictures.post_id)
@@ -121,7 +120,7 @@ SELECT
         WHERE u.user_id = :user
         GROUP BY u.username");
         $sth->execute(array(':user' => $id));
-        $keywords = $sth->fetchColumn(0) ?: [];
+        $keywords = $sth->fetchColumn(0) ?: "";
 
         $sth = $this->database->prepare("
         SELECT
@@ -168,7 +167,7 @@ SELECT
         $sth = $this->database->prepare("
         SELECT
              posts.post_id
-            ,pictures.url
+            ,pictures.picture_id
         FROM posts
              INNER JOIN picture AS pictures ON (posts.post_id = pictures.post_id)
 
@@ -187,7 +186,7 @@ SELECT
         $sth = $this->database->prepare("
         SELECT
             posts.post_id,
-            pictures.url
+            pictures.picture_id
         FROM posts
             INNER JOIN picture AS pictures ON (posts.post_id = pictures.post_id)
 
@@ -208,7 +207,7 @@ SELECT
         $sth = $this->database->prepare("
         SELECT
             posts.post_id,
-            pictures.url
+            pictures.picture_id
         FROM posts
         INNER JOIN picture AS pictures ON (posts.post_id = pictures.post_id)
         INNER JOIN posts_view pv on posts.post_id = pv.post_id
@@ -267,13 +266,13 @@ SELECT
 		$sth = $this->database->prepare("
 			SELECT
 				 posts.post_id,
-				 pictures.picture_id,
-				 pictures.url
+				 pictures.picture_id
 			FROM posts
 
 			INNER JOIN picture AS pictures ON (posts.post_id = pictures.post_id)
 
 			WHERE posts.post_id = :id
+			AND pictures.is_thumbnail = 0
 		");
 
 		$sth->execute(array(':id' => $id));
@@ -290,7 +289,6 @@ SELECT
 				,posts_comment.user_id
 				,users.username
 				,picture.picture_id
-				,picture.url
 				,posts_comment.reply_to
 				,posts_comment.content
 			FROM posts

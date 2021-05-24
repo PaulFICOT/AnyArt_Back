@@ -22,7 +22,6 @@ function resolveResponse($response, $statusCode, $content) {
 	$response = $response->withStatus($statusCode);
 	$response = $response->withHeader('Content-Type', 'application/json');
 	$response->getBody()->write(json_encode($content));
-
 	return $response;
 }
 
@@ -39,7 +38,7 @@ return function (App $app) {
 		$file = $pictureDAO->getUrlById($args['id']);
 
 		if (!file_exists($file)) {
-			return resolveResponse($response, 400, ['message' => "Image doesn't exist"]);
+			return resolveResponse($response, 404, ['message' => "Image doesn't exist"]);
 		}
 		$image = file_get_contents($file);
 		if ($image === false) {
@@ -69,15 +68,17 @@ return function (App $app) {
 			$pictureDAO = new PictureDAO();
 			foreach ($files as $file) {
 				['original' => $original, 'thumbnail' => $thumbnail] = $image_handler->processFile($file, true);
-				$pictureDAO->insertPicture([
+				$originalId = $pictureDAO->insertPicture([
 					':url' => $original,
 					':is_thumbnail' => 0,
+					':thumb_of' => null,
 					':user_id' => $body['user_id'],
 					':post_id' => $body['post_id'],
 				]);
 				$pictureDAO->insertPicture([
 					':url' => $thumbnail,
 					':is_thumbnail' => 1,
+					':thumb_of' => $originalId,
 					':user_id' => $body['user_id'],
 					':post_id' => $body['post_id'],
 				]);
@@ -113,26 +114,43 @@ return function (App $app) {
 				return resolveResponse($response, 200, ['post_id' => $post_id]);
 			});
 
-			$group->get('/thumbnails/{params}', function (Request $request, Response $response, $args) {
-				$postsDAO = new PostsDAO();
+			$group->group('/thumbnails', function (RouteCollectorProxy $group) {
+				$group->get('/newpost', function (Request $request, Response $response, $args) {
+					$postsDAO = new PostsDAO();
 
-				switch ($args['params']) {
-					case 'newpost':
-						return resolveResponse($response, 200, $postsDAO->getThumbnailsNewPosts());
-						break;
-					case 'hottest':
-						return resolveResponse($response, 200, $postsDAO->getThumbnailsHottests());
-						break;
-					case 'raising':
-						return resolveResponse($response, 200, $postsDAO->getThumbnailsRaising());
-						break;
-					case 'research':
-						return resolveResponse($response, 200, $postsDAO->getThumbnailsResearch($args['keywords']));
-					case 'unlogged':
-					default:
-						return resolveResponse($response, 200, $postsDAO->getThumbnailsUnlogged());
-						break;
-				}
+					return resolveResponse($response, 200, $postsDAO->getThumbnailsNewPosts());
+				});
+
+				$group->get('/hottest', function (Request $request, Response $response, $args) {
+					$postsDAO = new PostsDAO();
+
+					return resolveResponse($response, 200, $postsDAO->getThumbnailsHottests());
+				});
+
+				$group->get('/raising', function (Request $request, Response $response, $args) {
+					$postsDAO = new PostsDAO();
+
+					return resolveResponse($response, 200, $postsDAO->getThumbnailsRaising());
+				});
+
+				$group->get('/unlogged', function (Request $request, Response $response, $args) {
+					$postsDAO = new PostsDAO();
+
+					return resolveResponse($response, 200, $postsDAO->getThumbnailsUnlogged());
+				});
+
+				$group->get('/research', function (Request $request, Response $response, $args) {
+					$postsDAO = new PostsDAO();
+					$post = $postsDAO->getThumbnailsResearch($_GET['search_text']);
+					return resolveResponse($response, 200, $post);
+				});
+
+				$group->get('/discover', function (Request $request, Response $response, $args) {
+					$postsDAO = new PostsDAO();
+					$comments = $postsDAO->getThumbnailsDiscover($args['id']);
+
+					return resolveResponse($response, 200, $comments);
+				});
 			});
 
 			$group->group('/{id}', function (RouteCollectorProxy $group) {
@@ -246,34 +264,10 @@ return function (App $app) {
 
 					return resolveResponse($response, 200, ['message', 'Opinion successfully saved']);
 				});
-
-				$group->patch('/view', function (Request $request, Response $response, $args) {
-					$postsDAO = new PostsDAO();
-
-					$postsDAO->view($args['id']);
-				});
-
-				$group->patch('/cancel-like', function (Request $request, Response $response, $args) {
-					$postsDAO = new PostsDAO();
-					$body = json_decode($request->getBody()->getContents());
-
-					$postsDAO->rmLike([
-						'post_id' => $args['id'],
-						'user_id' => $body['user_id']
-					]);
-
-					return resolveResponse($response, 200, ["message" => 'Like successfully removed']);
-				});
-
-				$group->get('/discover', function (Request $request, Response $response, $args) {
-					$postsDAO = new PostsDAO();
-					$comments = $postsDAO->getThumbnailsDiscover($args['id']);
-
-					return resolveResponse($response, 200, $comments);
-				});
 			});
 
 		});
+
 
 		$group->group('/users', function (RouteCollectorProxy $group) {
 			/**
@@ -366,12 +360,12 @@ return function (App $app) {
 
 				$now = new DateTimeImmutable();
 				$token = $config->builder()
-								->identifiedBy('4f1g23a12aa')
-								->issuedAt($now)
-								->canOnlyBeUsedAfter($now->modify('+1 minute'))
-								->expiresAt($now->modify('+24 hour'))
-								->withClaim('uid', $user['user_id'])
-								->getToken($config->signer(), $config->signingKey());
+					->identifiedBy('4f1g23a12aa')
+					->issuedAt($now)
+					->canOnlyBeUsedAfter($now->modify('+1 minute'))
+					->expiresAt($now->modify('+24 hour'))
+					->withClaim('uid', $user['user_id'])
+					->getToken($config->signer(), $config->signingKey());
 
 				$usersDAO->setToken($user['user_id'], $token->toString());
 
