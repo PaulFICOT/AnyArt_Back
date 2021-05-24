@@ -63,7 +63,9 @@ class UsersDAO extends DbConnection {
                 country_id,
                 donation_link,
                 (SELECT picture.picture_id FROM picture
-                WHERE picture.user_id = users.user_id AND picture.post_id IS NULL AND picture.thumb_of IS NULL) profile_pic
+                WHERE picture.user_id = users.user_id AND picture.post_id IS NULL AND picture.thumb_of IS NULL) profile_pic,
+                (SELECT picture.url FROM picture
+                WHERE picture.user_id = users.user_id AND picture.post_id IS NULL AND picture.thumb_of IS NULL) profile_url
             FROM users
             WHERE user_id = :id");
 		$sth->execute(array(':id' => $id));
@@ -90,7 +92,9 @@ class UsersDAO extends DbConnection {
                 country_id,
                 donation_link,
                 (SELECT picture.picture_id FROM picture
-                WHERE picture.user_id = users.user_id AND picture.post_id IS NULL AND picture.thumb_of IS NULL) profile_pic
+                WHERE picture.user_id = users.user_id AND picture.post_id IS NULL AND picture.thumb_of IS NULL) profile_pic,
+                (SELECT picture.url FROM picture
+                WHERE picture.user_id = users.user_id AND picture.post_id IS NULL AND picture.thumb_of IS NULL) profile_url
             FROM users
             WHERE mail = :email");
 		$sth->execute(array(':email' => $email));
@@ -113,6 +117,8 @@ class UsersDAO extends DbConnection {
             ,users1.donation_link
             ,(SELECT picture.picture_id FROM picture
                 WHERE picture.user_id = users1.user_id AND picture.post_id IS NULL AND picture.thumb_of IS NULL) profile_pic
+            ,(SELECT picture.url FROM picture
+                WHERE picture.user_id = users1.user_id AND picture.post_id IS NULL AND picture.thumb_of IS NULL) profile_url
             ,(SELECT COUNT(followed_user_id) FROM users_follower AS users_follower2
                 WHERE users_follower2.followed_user_id = users1.user_id) AS 'Followers'
             ,(SELECT SUM(posts_view2.view_count) FROM posts AS posts2
