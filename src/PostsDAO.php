@@ -11,33 +11,34 @@ class PostsDAO extends DbConnection {
 	public function getPostAndUserByPostId($values): array {
 		$sth = $this->database->prepare("
 			SELECT
-				 posts.post_id
-				,posts.title
-				,posts.user_id
-				,users.username
-				,users.is_verified
-				,users.job_function
-				,users.open_to_work
-				,picture.picture_id
-				,posts.content
-				,views.view_count
-                ,:user_id
-				,(SELECT COUNT(like_id) FROM posts_like isliked
-				WHERE isliked.user_id = :user_id AND isliked.post_id = posts.post_id AND isliked.is_like = TRUE) AS 'isLiked'
-				,(SELECT COUNT(like_id) FROM posts_like isdisliked
-				WHERE isdisliked.user_id = :user_id AND isdisliked.post_id = posts.post_id AND isdisliked.is_like = FALSE) AS 'isDisliked'
-				,(SELECT COUNT(like_id) FROM posts_like likes
-					WHERE likes.post_id = posts.post_id AND likes.is_like = TRUE) AS 'likes'
-				,(SELECT COUNT(like_id) FROM posts_like dislikes
-					WHERE dislikes.post_id = posts.post_id AND dislikes.is_like = FALSE) AS 'dislikes'
+			 posts.post_id
+			,posts.title
+			,posts.user_id
+			,users.username
+			,users.is_verified
+			,users.job_function
+			,users.open_to_work
+			,(SELECT picture.picture_id FROM picture
+				WHERE picture.user_id = users.user_id AND picture.post_id IS NULL) 'picture_id'
+			,(SELECT picture.url FROM picture
+				WHERE picture.user_id = users.user_id AND picture.post_id IS NULL) 'url'
+			,posts.content
+			,views.view_count
+			,(SELECT COUNT(like_id) FROM posts_like isliked
+			WHERE isliked.user_id = 41 AND isliked.post_id = posts.post_id AND isliked.is_like = TRUE) AS 'isLiked'
+			,(SELECT COUNT(like_id) FROM posts_like isdisliked
+			WHERE isdisliked.user_id = 41 AND isdisliked.post_id = posts.post_id AND isdisliked.is_like = FALSE) AS 'isDisliked'
+			,(SELECT COUNT(like_id) FROM posts_like likes
+				WHERE likes.post_id = posts.post_id AND likes.is_like = TRUE) AS 'likes'
+			,(SELECT COUNT(like_id) FROM posts_like dislikes
+				WHERE dislikes.post_id = posts.post_id AND dislikes.is_like = FALSE) AS 'dislikes'
 
 			FROM posts
 
 			INNER JOIN users ON (posts.user_id = users.user_id)
 			INNER JOIN posts_view views ON (posts.post_id = views.post_id)
-			INNER JOIN picture ON (users.user_id = picture.user_id AND picture.post_id IS NULL)
 
-			WHERE posts.post_id = :post_id
+			WHERE posts.post_id = 1
     	");
 
 		$sth->execute($values);
@@ -265,14 +266,12 @@ class PostsDAO extends DbConnection {
 	public function getPicturesByPostId($id): array {
 		$sth = $this->database->prepare("
 			SELECT
-				 posts.post_id,
-				 pictures.picture_id
-			FROM posts
+				picture.picture_id,
+			   	picture.thumb_of
+			FROM picture
 
-			INNER JOIN picture AS pictures ON (posts.post_id = pictures.post_id)
-
-			WHERE posts.post_id = :id
-			AND pictures.is_thumbnail = 0
+			WHERE picture.post_id = :id
+			AND thumb_of IS NOT NULL
 		");
 
 		$sth->execute(array(':id' => $id));
