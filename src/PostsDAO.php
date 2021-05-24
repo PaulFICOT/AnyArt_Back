@@ -20,8 +20,6 @@ class PostsDAO extends DbConnection {
 			,users.open_to_work
 			,(SELECT picture.picture_id FROM picture
 				WHERE picture.user_id = users.user_id AND picture.post_id IS NULL) 'picture_id'
-			,(SELECT picture.url FROM picture
-				WHERE picture.user_id = users.user_id AND picture.post_id IS NULL) 'url'
 			,posts.content
 			,views.view_count
 			,(SELECT COUNT(like_id) FROM posts_like isliked
@@ -303,14 +301,14 @@ class PostsDAO extends DbConnection {
 				,posts_comment.crea_date
 				,posts_comment.user_id
 				,users.username
-				,picture.picture_id
+				,(SELECT picture.picture_id FROM picture
+				WHERE picture.user_id = users.user_id AND picture.post_id IS NULL) 'picture_id'
 				,posts_comment.reply_to
 				,posts_comment.content
 			FROM posts
 
 			INNER JOIN posts_comment ON (posts.post_id = posts_comment.post_id)
 			INNER JOIN users ON (posts.user_id = users.user_id)
-			INNER JOIN picture ON (users.user_id = picture.user_id AND picture.post_id IS NULL)
 
 			WHERE posts.post_id = :id
 
