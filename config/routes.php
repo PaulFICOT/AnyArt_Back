@@ -95,12 +95,9 @@ return function (App $app) {
 							':post_id' => NULL,
 						]);
 					}
+					$usersDAO = new UsersDAO();
+					return resolveResponse($response, 200, ['message' => 'Profile picture successfully updated', 'user_profile' => $usersDAO->getUserProfileByUserId($body['user_id']), 'user' => $usersDAO->getUsersById($body['user_id'])]);
 				}
-			}
-
-			if (empty($body['post_id'])) {
-				$usersDAO = new UsersDAO();
-				return resolveResponse($response, 200, ['message' => 'Profile picture successfully updated', 'user_profile' => $usersDAO->getUserProfileByUserId($body['user_id']), 'user' => $usersDAO->getUsersById($body['user_id'])]);
 			}
 
 			return resolveResponse($response, 200, ['message' => 'post successfully created']);
