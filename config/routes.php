@@ -152,26 +152,26 @@ return function (App $app) {
 			$group->group('/thumbnails', function (RouteCollectorProxy $group) {
 				$group->get('/newpost', function (Request $request, Response $response, $args) {
 					$postsDAO = new PostsDAO();
-
-					return resolveResponse($response, 200, $postsDAO->getThumbnailsNewPosts());
+					$filters = (!empty($_GET['filters']) ? explode(',', $_GET['filters']) : []);
+					return resolveResponse($response, 200, $postsDAO->getThumbnailsNewPosts($filters));
 				});
 
 				$group->get('/hottest', function (Request $request, Response $response, $args) {
 					$postsDAO = new PostsDAO();
-
-					return resolveResponse($response, 200, $postsDAO->getThumbnailsHottests());
+					$filters = (!empty($_GET['filters']) ? explode(',', $_GET['filters']) : []);
+					return resolveResponse($response, 200, $postsDAO->getThumbnailsHottests($filters));
 				});
 
 				$group->get('/raising', function (Request $request, Response $response, $args) {
 					$postsDAO = new PostsDAO();
-
-					return resolveResponse($response, 200, $postsDAO->getThumbnailsRaising());
+					$filters = (!empty($_GET['filters']) ? explode(',', $_GET['filters']) : []);
+					return resolveResponse($response, 200, $postsDAO->getThumbnailsRaising($filters));
 				});
 
 				$group->get('/unlogged', function (Request $request, Response $response, $args) {
 					$postsDAO = new PostsDAO();
-
-					return resolveResponse($response, 200, $postsDAO->getThumbnailsUnlogged());
+					$filters = (!empty($_GET['filters']) ? explode(',', $_GET['filters']) : []);
+					return resolveResponse($response, 200, $postsDAO->getThumbnailsUnlogged($filters));
 				});
 
 				$group->get('/research', function (Request $request, Response $response, $args) {
@@ -182,9 +182,8 @@ return function (App $app) {
 
 				$group->get('/{id}/discover', function (Request $request, Response $response, $args) {
 					$postsDAO = new PostsDAO();
-					$comments = $postsDAO->getThumbnailsDiscover($args['id']);
-
-					return resolveResponse($response, 200, $comments);
+					$filters = (!empty($_GET['filters']) ? explode(',', $_GET['filters']) : []);
+					return resolveResponse($response, 200, $postsDAO->getThumbnailsDiscover($args['id']));
 				});
 			});
 
@@ -513,12 +512,12 @@ return function (App $app) {
 			$usersDAO = new UsersDAO();
 			$params = json_decode(strval($request->getBody()), true);
 			$user = $usersDAO->getUsersByEmail($params['email']);
-			$user_password = $usersDAO->getUsersPasswordById($user['user_id']);
 
 			if (empty($user)) {
 				return resolveResponse($response, 400, ["message" => "Invalid email or password"]);
 			}
 
+			$user_password = $usersDAO->getUsersPasswordById($user['user_id']);
 			if (password_verify($params['password'], $user_password['password'])) {
 				$config = Configuration::forSymmetricSigner(
 					new Sha256(),
