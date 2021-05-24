@@ -6,6 +6,7 @@ INSERT INTO payment_method(name)
 VALUES ('CB'),
        ('PayPal');
 INSERT INTO categories(category)
-VALUES ('Dessin'),
+VALUES ('Drawing'),
        ('Street art'),
-       ('Peinture');
+       ('Paint'),
+       ('Photo');
