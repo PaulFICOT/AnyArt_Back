@@ -53,7 +53,7 @@ return function (App $app) {
 		$group->post('/upload', function (Request $request, Response $response, $args) {
 			$files = $request->getUploadedFiles();
 			$body = json_decode($request->getParsedBody()['data'], true);
-			$prefix = 'u' . $body['user_id'] . 'p' . $body['post_id'];
+			$prefix = 'u' . $body['user_id'] . (!empty($body['post_id']) ? 'p' . $body['post_id'] : '');
 			$image_handler = new ImageHandler($prefix);
 			foreach ($files as $file) {
 				if (!$image_handler->checkIntegrity($file)) {
@@ -68,6 +68,7 @@ return function (App $app) {
 			$pictureDAO = new PictureDAO();
 			foreach ($files as $key => $file) {
 				['original' => $original, 'thumbnail' => $thumbnail] = $image_handler->processFile($file, true);
+				if (!empty($body['post_id'])) {
 				$originalId = $pictureDAO->insertPicture([
 					':url' => $original,
 					':is_thumbnail' => 0,
@@ -82,6 +83,24 @@ return function (App $app) {
 					':user_id' => $body['user_id'],
 					':post_id' => $body['post_id'],
 				]);
+				} else {
+					if ($pictureDAO->hasProfilPicture($body['user_id'])) {
+						$pictureDAO->updatePicture($original, $body['user_id']);
+					} else {
+						$pictureDAO->insertPicture([
+							':url' => $original,
+							':is_thumbnail' => 0,
+							':thumb_of' => null,
+							':user_id' => $body['user_id'],
+							':post_id' => NULL,
+						]);
+					}
+				}
+			}
+
+			if (empty($body['post_id'])) {
+				$usersDAO = new UsersDAO();
+				return resolveResponse($response, 200, ['message' => 'Profile picture successfully updated', 'user_profile' => $usersDAO->getUserProfileByUserId($body['user_id']), 'user' => $usersDAO->getUsersById($body['user_id'])]);
 			}
 
 			return resolveResponse($response, 200, ['message' => 'post successfully created']);
@@ -151,6 +170,66 @@ return function (App $app) {
 
 					return resolveResponse($response, 200, $comments);
 				});
+			});
+
+			$group->get('/categories', function (Request $request, Response $response, $args) {
+				$postsDAO = new PostsDAO();
+				$categories = $postsDAO->getCategoriesByPostId($args['id']);
+
+				if (empty($categories)) {
+					return resolveResponse($response, 500, ["message" => "The post with this id (" . $args["id"] . ") is not found."]);
+				}
+
+				return resolveResponse($response, 200, $categories);
+			});
+
+			$group->get('/tags', function (Request $request, Response $response, $args) {
+				$postsDAO = new PostsDAO();
+				$tags = $postsDAO->getTagsByPostId($args['id']);
+
+				return resolveResponse($response, 200, $tags);
+			});
+
+			$group->get('/comments', function (Request $request, Response $response, $args) {
+				$postsDAO = new PostsDAO();
+				$comments = $postsDAO->getCommentByPostId($args['id']);
+
+				return resolveResponse($response, 200, $comments);
+			});
+
+			$group->post('/comments', function (Request $request, Response $response, $args) {
+				$postsDAO = new PostsDAO();
+
+				$body = json_decode($request->getBody()->getContents(), true);
+
+				$postsDAO->newComment([
+					':content' => $body['content'],
+					':crea_date' => $body['crea_date'],
+					':reply_to' => $body['reply_to'],
+					':user_id' => $body['user_id'],
+					':post_id' => $args['id']
+				]);
+
+				return resolveResponse($response, 200, ["message" => 'Comment successfully added']);
+			});
+
+			$group->get('/opinion', function (Request $request, Response $response, $args) {
+				$postsDAO = new PostsDAO();
+				$postsDAO = new PostsDAO();
+				$opinions = $postsDAO->getOpinion($args['id']);
+
+				return resolveResponse($response, 200, [
+					'likes' => $opinions[1] ?? 0,
+					'dislikes' => $opinions[0] ?? 0
+				]);
+			});
+
+			/**
+			 * Get all thumbnails posts of a user
+			 */
+			$group->get('/thumbnails/{id}', function (Request $request, Response $response, $args) {
+				$postsDAO = new PostsDAO();
+				return resolveResponse($response, 200, ["thumbnails" => $postsDAO->getThumbnailsByUserId($args['id'])]);
 			});
 
 			$group->group('/{id}', function (RouteCollectorProxy $group) {
@@ -277,6 +356,28 @@ return function (App $app) {
 
 		$group->group('/users', function (RouteCollectorProxy $group) {
 			/**
+			 * Check the user token
+			 */
+			$group->post('/verif', function (Request $request, Response $response) {
+				$usersDAO = new UsersDAO();
+				$param = json_decode(strval($request->getBody()), true);
+				return resolveResponse($response, 200, ["login" => $usersDAO->verifToken($param['id'], $param['token'])]);
+			});
+
+			/**
+			 * Get all information for the user profile
+			 */
+			$group->get('/profile/{id}', function (Request $request, Response $response, $args) {
+				$usersDAO = new UsersDAO();
+				$user = $usersDAO->getUserProfileByUserId($args['id']);
+
+				if (empty($user)) {
+					return resolveResponse($response, 500, ["message" => "The user with this id (" . $args["id"] . ") is not found."]);
+				}
+				return resolveResponse($response, 200, ["user" => $user]);
+			});
+
+			/**
 			 * Get all users
 			 */
 			$group->get('', function (Request $request, Response $response) {
@@ -313,12 +414,56 @@ return function (App $app) {
 			});
 
 			/**
-			 * Get all users
+			 * Modify a user account
 			 */
-			$group->post('/verif', function (Request $request, Response $response) {
+			$group->post('/{id}', function (Request $request, Response $response, $args) {
+				$usersDAO = new UsersDAO();
+				try {
+					$usersDAO->modifyUser($args['id'], json_decode(strval($request->getBody()), true));
+				} catch (PDOException $e) {
+					if ($e->errorInfo[1] == 1062) {
+						return resolveResponse($response, 400, ["message" => "This email already exists."]);
+					}
+				}
+				return resolveResponse($response, 200, ["message" => "Your information was updated successfully.", "user_profile" => $usersDAO->getUserProfileByUserId($args['id']), "user" => $usersDAO->getUsersById($args['id'])]);
+			});
+
+			/**
+			 * Modify the password of a user account
+			 */
+			$group->post('/{id}/password', function (Request $request, Response $response, $args) {
+				$usersDAO = new UsersDAO();
+				$params = json_decode(strval($request->getBody()), true);
+				$user_password = $usersDAO->getUsersPasswordById($args['id']);
+
+				if (!password_verify($params['old_password'], $user_password['password'])) {
+					return resolveResponse($response, 400, ["message" => "The old password is incorrect."]);
+				}
+
+				$usersDAO->modifyUserPassword($args['id'], $params['new_password']);
+				return resolveResponse($response, 200, ["message" => "Your password was updated successfully."]);
+			});
+
+			/**
+			 * Follow or unfollow a user
+			 */
+			$group->post('/{followed}/{follower}', function (Request $request, Response $response, $args) {
 				$usersDAO = new UsersDAO();
 				$param = json_decode(strval($request->getBody()), true);
-				return resolveResponse($response, 200, ["login" => $usersDAO->verifToken($param['id'], $param['token'])]);
+				if ($param["mode"] == "add") {
+					$usersDAO->addFollower($args['follower'], $args['followed']);
+				} else {
+					$usersDAO->removeFollower($args['follower'], $args['followed']);
+				}
+				return resolveResponse($response, 200, ["message" => "Follow " . $param["mode"], "is_followed" => $usersDAO->isFollowing($args['follower'], $args['followed'])]);
+			});
+
+			/**
+			 * Check if a user is followed by another user
+			 */
+			$group->get('/{followed}/{follower}', function (Request $request, Response $response, $args) {
+				$usersDAO = new UsersDAO();
+				return resolveResponse($response, 200, ["is_followed" => $usersDAO->isFollowing($args['follower'], $args['followed'])]);
 			});
 		});
 
@@ -353,12 +498,13 @@ return function (App $app) {
 			$usersDAO = new UsersDAO();
 			$params = json_decode(strval($request->getBody()), true);
 			$user = $usersDAO->getUsersByEmail($params['email']);
+			$user_password = $usersDAO->getUsersPasswordById($user['user_id']);
 
 			if (empty($user)) {
 				return resolveResponse($response, 400, ["message" => "Invalid email or password"]);
 			}
 
-			if (password_verify($params['password'], $user['password'])) {
+			if (password_verify($params['password'], $user_password['password'])) {
 				$config = Configuration::forSymmetricSigner(
 					new Sha256(),
 					InMemory::plainText('supersecret')
@@ -375,24 +521,7 @@ return function (App $app) {
 
 				$usersDAO->setToken($user['user_id'], $token->toString());
 
-				$data_user = [
-					'user_id' => $user['user_id'],
-					'lastname' => $user['lastname'],
-					'firstname' => $user['firstname'],
-					'mail' => $user['mail'],
-					'birth_date' => $user['birth_date'],
-					'username' => $user['username'],
-					'is_verified' => $user['is_verified'],
-					'is_active' => $user['is_active'],
-					'is_banned' => $user['is_banned'],
-					'profile_desc' => $user['profile_desc'],
-					'type' => $user['type'],
-					'job_function' => $user['job_function'],
-					'open_to_work' => $user['open_to_work'],
-					'country_id' => $user['country_id'],
-				];
-
-				return resolveResponse($response, 200, ["token" => $token->toString(), "user" => $data_user]);
+				return resolveResponse($response, 200, ["token" => $token->toString(), "user" => $user]);
 			}
 
 			return resolveResponse($response, 400, ["message" => "Invalid email or password"]);
