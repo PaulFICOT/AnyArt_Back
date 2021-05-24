@@ -4,11 +4,12 @@ CREATE TRIGGER new_post
     ON posts
     FOR EACH ROW
 BEGIN
-    INSERT INTO notifications(content, is_read, crea_date, target_id, follower_id, post_id)
+    INSERT INTO notifications(content, is_read, crea_date, target_id, follower_user_id, follower_id, post_id)
     SELECT CONCAT(users.username, ' has published new pictures'),
            false,
            NOW(),
            users_follower.follower_user_id,
+           null,
            null,
            NEW.post_id
     FROM posts
@@ -21,11 +22,12 @@ CREATE TRIGGER new_follow
     ON users_follower
     FOR EACH ROW
 BEGIN
-    INSERT INTO notifications(content, is_read, crea_date, target_id, follower_id, post_id)
+    INSERT INTO notifications(content, is_read, crea_date, target_id, follower_user_id, follower_id, post_id)
     SELECT CONCAT(users.username, ' is now following you !'),
            false,
            NOW(),
            NEW.followed_user_id,
+           NEW.follower_user_id,
            NEW.follower_id,
            null
     FROM users_follower
@@ -38,11 +40,12 @@ CREATE TRIGGER new_comment
     FOR EACH ROW
 BEGIN
     IF NEW.reply_to IS NULL THEN
-        INSERT INTO notifications(content, is_read, crea_date, target_id, follower_id, post_id)
+        INSERT INTO notifications(content, is_read, crea_date, target_id, follower_user_id, follower_id, post_id)
         SELECT CONCAT(users.username, ' commented on your post !'),
                false,
                NOW(),
                posts.user_id,
+               null,
                null,
                NEW.post_id
         FROM posts_comment
@@ -62,6 +65,7 @@ BEGIN
                                   is_read,
                                   crea_date,
                                   target_id,
+                                  follower_user_id,
                                   follower_id,
                                   post_id)
         SELECT CONCAT(
@@ -71,6 +75,7 @@ BEGIN
                false,
                NOW(),
                reply_comment.user_id,
+               null,
                null,
                NEW.post_id
         FROM posts_comment
@@ -89,12 +94,14 @@ BEGIN
                               is_read,
                               crea_date,
                               target_id,
+                              follower_user_id,
                               follower_id,
                               post_id)
     SELECT CONCAT(users.username, ' just liked your post !'),
            false,
            NOW(),
            posts.user_id,
+           null,
            null,
            NEW.post_id
     FROM posts_like

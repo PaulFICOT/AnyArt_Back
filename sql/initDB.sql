@@ -179,13 +179,14 @@ CREATE TABLE posts_view
 
 CREATE TABLE notifications
 (
-    id_notification INT          NOT NULL AUTO_INCREMENT,
-    content         VARCHAR(255) NOT NULL,
-    is_read         BOOLEAN      NOT NULL,
-    crea_date       DATETIME     NOT NULL,
-    target_id       INT          NOT NULL,
-    follower_id     INT,
-    post_id         INT,
+    id_notification  INT          NOT NULL AUTO_INCREMENT,
+    content          VARCHAR(255) NOT NULL,
+    is_read          BOOLEAN      NOT NULL,
+    crea_date        DATETIME     NOT NULL,
+    target_id        INT          NOT NULL,
+    follower_user_id INT,
+    follower_id      INT,
+    post_id          INT,
     PRIMARY KEY (id_notification),
     FOREIGN KEY (post_id) REFERENCES posts (post_id)
         ON DELETE CASCADE,
