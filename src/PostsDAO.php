@@ -25,9 +25,9 @@ class PostsDAO extends DbConnection {
 			,posts.content
 			,views.view_count
 			,(SELECT COUNT(like_id) FROM posts_like isliked
-			WHERE isliked.user_id = 41 AND isliked.post_id = posts.post_id AND isliked.is_like = TRUE) AS 'isLiked'
+			WHERE isliked.user_id = :user_id AND isliked.post_id = posts.post_id AND isliked.is_like = TRUE) AS 'isLiked'
 			,(SELECT COUNT(like_id) FROM posts_like isdisliked
-			WHERE isdisliked.user_id = 41 AND isdisliked.post_id = posts.post_id AND isdisliked.is_like = FALSE) AS 'isDisliked'
+			WHERE isdisliked.user_id = :user_id AND isdisliked.post_id = posts.post_id AND isdisliked.is_like = FALSE) AS 'isDisliked'
 			,(SELECT COUNT(like_id) FROM posts_like likes
 				WHERE likes.post_id = posts.post_id AND likes.is_like = TRUE) AS 'likes'
 			,(SELECT COUNT(like_id) FROM posts_like dislikes
@@ -38,7 +38,7 @@ class PostsDAO extends DbConnection {
 			INNER JOIN users ON (posts.user_id = users.user_id)
 			INNER JOIN posts_view views ON (posts.post_id = views.post_id)
 
-			WHERE posts.post_id = 1
+			WHERE posts.post_id = :post_id
     	");
 
 		$sth->execute($values);
