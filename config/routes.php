@@ -56,11 +56,29 @@ return function (App $app) {
 			$prefix = 'u' . $body['user_id'] . (!empty($body['post_id']) ? 'p' . $body['post_id'] : '');
 			$image_handler = new ImageHandler($prefix);
 			foreach ($files as $file) {
+				if ($file->getError() > 0) {
+					switch ($file->getError()) {
+						case UPLOAD_ERR_INI_SIZE:
+							return resolveResponse(
+								$response,
+								400,
+								['message' => "{$file->getClientFilename()}'s size is to big"]
+							);
+							break;
+							default:
+								return resolveResponse(
+									$response,
+									400,
+									['message' => "Unknown error on {$file->getClientFilename()}"]
+								);
+								break;
+					}
+				}
 				if (!$image_handler->checkIntegrity($file)) {
 					return resolveResponse(
 						$response,
 						400,
-						['message' => "{$file->getClientFilename()} type isn't supported"]
+						['message' => "{$file->getClientFilename()}'s type isn't supported"]
 					);
 				}
 			}
@@ -69,20 +87,20 @@ return function (App $app) {
 			foreach ($files as $key => $file) {
 				['original' => $original, 'thumbnail' => $thumbnail] = $image_handler->processFile($file, true);
 				if (!empty($body['post_id'])) {
-				$originalId = $pictureDAO->insertPicture([
-					':url' => $original,
-					':is_thumbnail' => 0,
-					':thumb_of' => null,
-					':user_id' => $body['user_id'],
-					':post_id' => $body['post_id'],
-				]);
-				$pictureDAO->insertPicture([
-					':url' => $thumbnail,
-					':is_thumbnail' => $key == 0 ? 1 : 0,
-					':thumb_of' => $originalId,
-					':user_id' => $body['user_id'],
-					':post_id' => $body['post_id'],
-				]);
+					$originalId = $pictureDAO->insertPicture([
+						':url' => $original,
+						':is_thumbnail' => 0,
+						':thumb_of' => null,
+						':user_id' => $body['user_id'],
+						':post_id' => $body['post_id'],
+					]);
+					$pictureDAO->insertPicture([
+						':url' => $thumbnail,
+						':is_thumbnail' => $key == 0 ? 1 : 0,
+						':thumb_of' => $originalId,
+						':user_id' => $body['user_id'],
+						':post_id' => $body['post_id'],
+					]);
 				} else {
 					if ($pictureDAO->hasProfilPicture($body['user_id'])) {
 						$pictureDAO->updatePicture($original, $body['user_id']);
