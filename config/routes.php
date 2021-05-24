@@ -179,7 +179,7 @@ return function (App $app) {
 					return resolveResponse($response, 200, $post);
 				});
 
-				$group->get('/discover', function (Request $request, Response $response, $args) {
+				$group->get('/{id}/discover', function (Request $request, Response $response, $args) {
 					$postsDAO = new PostsDAO();
 					$comments = $postsDAO->getThumbnailsDiscover($args['id']);
 
@@ -249,11 +249,10 @@ return function (App $app) {
 
 			$group->group('/{id}', function (RouteCollectorProxy $group) {
 				$group->get('', function (Request $request, Response $response, $args) {
-					$query_params = $request->getQueryParams();
 					$postsDAO = new PostsDAO();
 					$post = $postsDAO->getPostAndUserByPostId([
 						':post_id' => $args['id'],
-						':user_id' => $query_params['user_id']
+						':user_id' => $_GET['user_id']
 					]);
 					if (empty($post)) {
 						return resolveResponse($response, 500, ["message" => "The post with this id (" . $args["id"] . ") is not found."]);

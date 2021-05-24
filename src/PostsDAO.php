@@ -109,7 +109,7 @@ class PostsDAO extends DbConnection {
 		$sth = $this->database->prepare("
             SELECT
                 posts.post_id,
-                pictures.url
+                pictures.picture_id
             FROM posts
 
             INNER JOIN picture AS pictures ON (posts.post_id = pictures.post_id)
