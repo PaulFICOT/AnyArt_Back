@@ -107,6 +107,22 @@ class PostsDAO extends DbConnection {
 		return $sth->fetchAll(PDO::FETCH_ASSOC) ?: [];
 	}
 
+    public function getThumbnailsByUserId($user_id): array {
+		$sth = $this->database->prepare("
+            SELECT
+                posts.post_id,
+                pictures.url
+            FROM posts
+
+            INNER JOIN picture AS pictures ON (posts.post_id = pictures.post_id)
+
+            WHERE pictures.is_thumbnail = '1' AND posts.user_id = :user_id
+        ");
+		$sth->execute([':user_id' => $user_id]);
+
+		return $sth->fetchAll(PDO::FETCH_ASSOC) ?: [];
+	}
+
     public function getThumbnailsDiscover($id): array {
         $maxView = 1500;
 

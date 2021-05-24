@@ -26,4 +26,43 @@ class PictureDAO extends DbConnection {
 
 		return $this->database->lastInsertId();
 	}
+
+	public function updatePicture($url, $user_id) {
+		$sth = $this->database->prepare("
+			UPDATE
+				picture
+			SET
+				url = :url
+			WHERE
+				is_thumbnail = 0
+            	AND thumb_of IS NULL
+				AND user_id = :user_id
+				AND post_id IS NULL
+		");
+
+		$sth->execute([
+			':url' => $url,
+			':user_id' => $user_id,
+		]);
+	}
+
+	public function hasProfilPicture($user_id): bool {
+        $sth = $this->database->prepare("
+            SELECT
+                COUNT(picture_id) AS 'picture_id'
+            FROM picture
+
+            WHERE
+				is_thumbnail = 0
+            	AND thumb_of IS NULL
+				AND user_id = :user_id
+				AND post_id IS NULL
+        ");
+
+        $sth->execute([
+			':user_id' => $user_id,
+		]);
+
+        return $sth->fetch(PDO::FETCH_ASSOC)['picture_id'] >= 1;
+    }
 }
